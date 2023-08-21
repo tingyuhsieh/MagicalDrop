@@ -5,5 +5,5 @@ This is a simple game paying tribute to "Magical Drop".
 Made by Processing  
 Open "MagicalDrop.pde" file and press "0" to start.
 
-quick start on OpenProcessing without sound↓
+quick start on OpenProcessing without sound↓  
 https://openprocessing.org/sketch/1987409
