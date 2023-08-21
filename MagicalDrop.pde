@@ -68,10 +68,10 @@ void draw() {
     }
     if (player2.bombCount==player2.bombtime-1) {
 
-      if (player2.combo%2 ==0)player2.addLines();
+      if (player2.combo%2 ==0)player1.addLines();
     }
     if (player1.stopCombo) player2.attacked();
-    if (player2.stopCombo) player2.attacked();
+    if (player2.stopCombo) player1.attacked();
     tint(255, 200);
     pushMatrix();
     scale(1, 1);
