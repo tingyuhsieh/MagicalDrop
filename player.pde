@@ -204,7 +204,30 @@ class player {
       }
     }
   }
+  
+  //----------------------畫出數字----------------------
+  void drawCombo(float _posX, float _posY) {
+    if (combo>0)drawNum(combo, 2, _posX, _posY);
+  }
 
+  void drawPoint(float _posX, float _posY) {
+    drawNum(bombN, 3, _posX, _posY);
+  }
+
+  void drawNum(int _number, int _digits, float _posX, float _posY) {
+    int imgWidth = 40;
+    int imgHeight = 60;
+
+    pushMatrix();
+    tint(255, 200);
+    scale(1, 1);
+    translate(_posX, _posY);
+    for (int i = 0; i < _digits; i++) {
+      image(num[floor(_number/pow(10, i))%10], -imgWidth*i, 0, imgWidth, imgHeight);
+    }
+    popMatrix();
+  }
+  
   void keyPressed() {
     //---------------------player1--------------------------
     //-----------------------左右移動------------------------
