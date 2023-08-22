@@ -9,7 +9,6 @@ PImage bg;
 PImage win, lose;
 player player1, player2;
 Runtime runtime;
-String comboStr, pointStr;
 PImage[] num = new PImage[10];
 int mode;
 
@@ -50,7 +49,6 @@ void setup() {
 }
 
 void draw() {
-  println(player2.deadButt);
   if (frameCount%300==0) {
     thread("garbageCollector");
   }

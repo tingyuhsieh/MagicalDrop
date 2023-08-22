@@ -183,7 +183,6 @@ class player {
       //else if (posY-deadButt<5 && posY-deadButt>=3) flash = 3;
       //else if (posY-deadButt<3 && posY-deadButt>=1) flash = 5;
       float a = sin(radians((frameCount%(360/flash))*flash))*127.5+127.5;
-      //println(a);
       pushMatrix();
       stroke(255, a, a);
       line(0*rectSize, (gridH-1)*rectSize, gridW*rectSize, (gridH-1)*rectSize);
