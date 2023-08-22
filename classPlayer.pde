@@ -1,9 +1,9 @@
-class player {
+class Player {
 
   int [][] grid;
   int [][] state;
   int lines, flash;
-  int gridW, gridH, posX, posY, nBalls, samei, starty, buttColor, gotColor, butt, deadButt, ballY, rectSize, noBall;
+  int gridW, gridH, posX, posY, nBalls, bombTarget, startY, buttColor, gotColor, butt, deadButt, ballY, rectSize, noBall;
   boolean gotBalls, bomb, ballDown, ballUp, isBall, delayStart, stopCombo;
   int combo=0;
   int v, delay, delaytime;
@@ -18,15 +18,15 @@ class player {
   int playerIndex;
   int bombN;
 
-  player(int _playerIndex) {
+  Player(int playerIndex) {
 
-    playerIndex=_playerIndex;
+    this.playerIndex=playerIndex;
     rectSize = 50;
     gridW = 7;
     gridH = 13;
     posX = 3;
     posY = gridH-1;
-    starty=0;
+    startY=0;
     nBalls = 0;
     ballY = 0;
     noBall = 0;
@@ -66,8 +66,8 @@ class player {
     }
   }
 
-  void drawPlayer(PImage _BGimg) {
-    image(_BGimg, 0, 0);
+  void drawPlayer(PImage imgPlayer) {
+    image(imgPlayer, 0, 0);
     if (mode == 1) {
       getButt();
       drawLine();
@@ -89,7 +89,7 @@ class player {
       }
 
       if (endBomb==true&&endBombchild==true) {
-        if (comboPlus==true||bomb==true)BombAndFly();
+        if (comboPlus==true||bomb==true)bombAndFly();
       }
       //---------------combo計算的delay,combo時播聲音一次--------------------
 
@@ -111,10 +111,10 @@ class player {
       for (int i = 0; i < gridW; i++) {
         for (int j = 0; j < gridH-1; j++) {
 
-          if (grid[i][j] == 1) image(red, i*rectSize, j*rectSize);
-          else if (grid[i][j] == 2) image(yellow, i*rectSize, j*rectSize);
-          else if (grid[i][j] == 3) image(green, i*rectSize, j*rectSize);
-          else if (grid[i][j] == 4) image(blue, i*rectSize, j*rectSize);
+          if (grid[i][j] == 1) image(imgRedBall, i*rectSize, j*rectSize);
+          else if (grid[i][j] == 2) image(imgYellowBall, i*rectSize, j*rectSize);
+          else if (grid[i][j] == 3) image(imgGreenBall, i*rectSize, j*rectSize);
+          else if (grid[i][j] == 4) image(imgBlueBall, i*rectSize, j*rectSize);
           else if (grid[i][j] == 5) {
             pushMatrix();
             if (frameCount%4 == 0) fill(255, 100, 0);
@@ -154,19 +154,19 @@ class player {
       //--------------------------------玩家球的顏色------------------------
       if (gotColor == 0) {
         c = color(255, 255, 255);
-        image(empty, posX*rectSize, posY*rectSize);
+        image(imgEmpty, posX*rectSize, posY*rectSize);
       } else if (gotColor == 1) {
         c = color(255, 0, 0);
-        image(red, posX*rectSize, posY*rectSize);
+        image(imgRedBall, posX*rectSize, posY*rectSize);
       } else if (gotColor == 2) {
         c = color(255, 255, 0);
-        image(yellow, posX*rectSize, posY*rectSize);
+        image(imgYellowBall, posX*rectSize, posY*rectSize);
       } else if (gotColor == 3) {
         c = color(0, 255, 0);
-        image(green, posX*rectSize, posY*rectSize);
+        image(imgGreenBall, posX*rectSize, posY*rectSize);
       } else if (gotColor == 4) {
         c = color(0, 0, 255);
-        image(blue, posX*rectSize, posY*rectSize);
+        image(imgBlueBall, posX*rectSize, posY*rectSize);
       }
       //----------------------------死線--------------------------------
       //for (int j = gridH-2; j >= 0; j--) {
@@ -203,30 +203,30 @@ class player {
       }
     }
   }
-  
+
   //----------------------畫出數字----------------------
-  void drawCombo(float _posX, float _posY) {
-    if (combo>0)drawNum(combo, 2, _posX, _posY);
+  void drawCombo(float posX, float posY) {
+    if (combo>0)drawNum(combo, 2, posX, posY);
   }
 
-  void drawPoint(float _posX, float _posY) {
-    drawNum(bombN, 3, _posX, _posY);
+  void drawPoint(float posX, float posY) {
+    drawNum(bombN, 3, posX, posY);
   }
 
-  void drawNum(int _number, int _digits, float _posX, float _posY) {
+  void drawNum(int number, int digits, float posX, float posY) {
     int imgWidth = 40;
     int imgHeight = 60;
 
     pushMatrix();
     tint(255, 200);
     scale(1, 1);
-    translate(_posX, _posY);
-    for (int i = 0; i < _digits; i++) {
-      image(num[floor(_number/pow(10, i))%10], -imgWidth*i, 0, imgWidth, imgHeight);
+    translate(posX, posY);
+    for (int i = 0; i < digits; i++) {
+      image(imgNum[floor(number/pow(10, i))%10], -imgWidth*i, 0, imgWidth, imgHeight);
     }
     popMatrix();
   }
-  
+
   void keyPressed() {
     //---------------------player1--------------------------
     //-----------------------左右移動------------------------
@@ -251,9 +251,9 @@ class player {
       //---------------------上下拿球丟球---------------------
 
       else if (key=='s') { 
-        up.stop();
-        findstarty();
-        buttisBall();//偵測底部的球是不是可以拿的球
+        soundBallUp.stop();
+        findStartY();
+        buttHasBall();//偵測底部的球是不是可以拿的球
         if (isBall) {//是可以拿的球才判斷是不是可以拿的顏色
           getButtColor(); 
           if (gotBalls == false) {//手上沒球
@@ -265,12 +265,12 @@ class player {
           }
         } else ballDown=false;
       } else if (key =='w') {
-        down.stop();
+        soundBallDown.stop();
 
         if (gotBalls) {//如果手上有球就丟
-          findstarty();
-          ThrowAndWait(nBalls);
-          findstarty();//更新starty讓動畫正確
+          findStartY();
+          throwAndWait(nBalls);
+          findStartY();//更新starty讓動畫正確
           ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
         } else ballUp=false;
       }
@@ -299,9 +299,9 @@ class player {
       //---------------------上下拿球丟球---------------------
 
       else if (keyCode ==DOWN) { 
-        up.stop();
-        findstarty();
-        buttisBall();//偵測底部的球是不是可以拿的球
+        soundBallUp.stop();
+        findStartY();
+        buttHasBall();//偵測底部的球是不是可以拿的球
         if (isBall) {//是可以拿的球才判斷是不是可以拿的顏色
           getButtColor(); 
           if (gotBalls == false) {//手上沒球
@@ -313,12 +313,12 @@ class player {
           }
         } else ballDown=false;
       } else if (keyCode ==UP) {
-        down.stop();
+        soundBallDown.stop();
 
         if (gotBalls) {//如果手上有球就丟
-          findstarty();
-          ThrowAndWait(nBalls);
-          findstarty();//更新starty讓動畫正確
+          findStartY();
+          throwAndWait(nBalls);
+          findStartY();//更新starty讓動畫正確
           ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
         } else ballUp=false;
       }
@@ -326,20 +326,20 @@ class player {
   }
 
   //--------------------balldelay---------------
-  void ThrowAndWait(int _nBalls) {
-    up.stop();
-    up.play();
+  void throwAndWait(int nBalls) {
+    soundBallUp.stop();
+    soundBallUp.play();
     ballUp = true;
     ballDown = false;
 
-    for (int i=starty; i<starty+_nBalls; i++) {
+    for (int i=startY; i<startY+nBalls; i++) {
       grid[posX][i]=gotColor;
     } 
 
     detectThree();//偵測是否三個相連(是否觸發消除)
     if (bomb) {//有待爆球的情況
       combo+=1;
-      colorReadyBomb(posX, starty+nBalls-1);
+      colorReadyBomb(posX, startY+this.nBalls-1);
       findSix();
       endBomb=false;
       delayStart = true;
@@ -360,12 +360,12 @@ class player {
         }
       }
     }
-    nBalls = 0;//丟完之後手上拿的球歸零
+    this.nBalls = 0;//丟完之後手上拿的球歸零
     gotBalls = false;
   }
-  void BombAndFly() {
+  void bombAndFly() {
 
-    BombBall();
+    bombBall();
     detectHole();//球往上飄
     comboPlus=false;
     for (int i = 0; i < gridW; i++) {
@@ -399,7 +399,7 @@ class player {
     buttColor = grid[posX][butt-1];
     if (!isBall)buttColor=0;
   }
-  void buttisBall() {//判斷底部是不是可拿的球(拿球時使用)
+  void buttHasBall() {//判斷底部是不是可拿的球(拿球時使用)
     if (butt-1>=0) {//butt-1:不是0也不是5的位置上方 
       isBall=true;
     } else {
@@ -417,14 +417,14 @@ class player {
     }
   }
   void takeBalls() {
-    down.stop();
-    down.play();
+    soundBallDown.stop();
+    soundBallDown.play();
     ballDown = true;
     ballUp = false;
 
     if (state[posX][butt-1]==6)state[posX][butt-1]=0;//拿還沒往上飄的球時把state歸零            
     gotColor = buttColor;//手上的球變成底部球的顏色
-    ballY = starty;//讓動畫開始跑
+    ballY = startY;//讓動畫開始跑
 
     for (int j = gridH-2; j >= 0; j--) {//把吸掉的球清空
       if (grid[posX][j] == gotColor) {//計算顏色相同的球數
@@ -439,17 +439,17 @@ class player {
 
     if (ballDown && ballY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
       ballY++;
-      if (gotColor == 1) image(red, posX*rectSize, ballY*rectSize);
-      else if (gotColor == 2) image(yellow, posX*rectSize, ballY*rectSize);
-      else if (gotColor == 3) image(green, posX*rectSize, ballY*rectSize);
-      else if (gotColor == 4) image(blue, posX*rectSize, ballY*rectSize);
-    } else if (ballUp && ballY >= starty) {//丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
-      if (ballY > starty) {
+      if (gotColor == 1) image(imgRedBall, posX*rectSize, ballY*rectSize);
+      else if (gotColor == 2) image(imgYellowBall, posX*rectSize, ballY*rectSize);
+      else if (gotColor == 3) image(imgGreenBall, posX*rectSize, ballY*rectSize);
+      else if (gotColor == 4) image(imgBlueBall, posX*rectSize, ballY*rectSize);
+    } else if (ballUp && ballY >= startY) {//丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
+      if (ballY > startY) {
         ballY--;      
-        if (gotColor == 1) image(red, ballX*rectSize, ballY*rectSize);
-        else if (gotColor == 2) image(yellow, ballX*rectSize, ballY*rectSize);
-        else if (gotColor == 3) image(green, ballX*rectSize, ballY*rectSize);
-        else if (gotColor == 4) image(blue, ballX*rectSize, ballY*rectSize);
+        if (gotColor == 1) image(imgRedBall, ballX*rectSize, ballY*rectSize);
+        else if (gotColor == 2) image(imgYellowBall, ballX*rectSize, ballY*rectSize);
+        else if (gotColor == 3) image(imgGreenBall, ballX*rectSize, ballY*rectSize);
+        else if (gotColor == 4) image(imgBlueBall, ballX*rectSize, ballY*rectSize);
       } else gotColor=0;//動畫跑完下面的球才歸零(先歸零或用starty動畫都會消失)(使用starty因為不會略過5所以消除時不會有動畫)
     }
   }
@@ -474,23 +474,23 @@ class player {
     }
   }
 
-  void fillHole(int _x, int _y) {
-    for (int j=_y; j<gridH-2; j++) {//往上移
-      grid[_x][j]=grid[_x][j+1];
-      state[_x][j]=state[_x][j+1];
-      grid[_x][j+1]=0;
-      state[_x][j+1]=0;
+  void fillHole(int x, int y) {
+    for (int j=y; j<gridH-2; j++) {//往上移
+      grid[x][j]=grid[x][j+1];
+      state[x][j]=state[x][j+1];
+      grid[x][j+1]=0;
+      state[x][j+1]=0;
     }
   }
 
-  void findstarty() {//找底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
+  void findStartY() {//找底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
 
     for (int j = gridH-2; j >= 0; j--) {
       if (grid[posX][j] != 0) {
-        starty = j+1;
+        startY = j+1;
         break;
       } else {
-        starty =0;
+        startY =0;
       }
     }
   }
@@ -498,10 +498,10 @@ class player {
   void detectThree() {//偵測往上丟的球是否觸發引爆,且沒有引爆時會斷combo
     bomb=false;
     stopCombo = true;
-    if (starty+nBalls-2>=0) {
-      if (grid[posX][starty+nBalls-2]==grid[posX][starty+nBalls-1]) {
-        if (starty+nBalls-3>=0) {
-          if (grid[posX][starty+nBalls-3]==grid[posX][starty+nBalls-1]) {
+    if (startY+nBalls-2>=0) {
+      if (grid[posX][startY+nBalls-2]==grid[posX][startY+nBalls-1]) {
+        if (startY+nBalls-3>=0) {
+          if (grid[posX][startY+nBalls-3]==grid[posX][startY+nBalls-1]) {
             bomb=true;
             stopCombo = false;
           }
@@ -511,31 +511,31 @@ class player {
   }
 
 
-  void detectThree(int _x, int _y) {//偵測往上飄的球是否的觸發引爆
-    if (grid[_x][_y]!=0) {
+  void detectThree(int x, int y) {//偵測往上飄的球是否的觸發引爆
+    if (grid[x][y]!=0) {
       bomb=false;
-      if (_y-1>=0) {
-        if (grid[_x][_y-1]==grid[_x][_y]) {
-          if (_y-2>=0) {
-            if (grid[_x][_y-2]==grid[_x][_y]) {
+      if (y-1>=0) {
+        if (grid[x][y-1]==grid[x][y]) {
+          if (y-2>=0) {
+            if (grid[x][y-2]==grid[x][y]) {
               bomb=true;
             }
           }
         }
       }
-      if (_y-1>=0) {
-        if (grid[_x][_y-1]==grid[_x][_y]) {
-          if (_y+1<gridH-1) {
-            if (grid[_x][_y+1]==grid[_x][_y]) {
+      if (y-1>=0) {
+        if (grid[x][y-1]==grid[x][y]) {
+          if (y+1<gridH-1) {
+            if (grid[x][y+1]==grid[x][y]) {
               bomb=true;
             }
           }
         }
       }
-      if (_y+1<gridH-1) {
-        if (grid[_x][_y+1]==grid[_x][_y]) {
-          if (_y+2<gridH-1) {
-            if (grid[_x][_y+2]==grid[_x][_y]) {
+      if (y+1<gridH-1) {
+        if (grid[x][y+1]==grid[x][y]) {
+          if (y+2<gridH-1) {
+            if (grid[x][y+2]==grid[x][y]) {
               bomb=true;
             }
           }
@@ -544,26 +544,26 @@ class player {
     }
   }
 
-  void colorReadyBomb(int _x, int _y) {//觸發周遭相同顏色的球變成5
+  void colorReadyBomb(int x, int y) {//觸發周遭相同顏色的球變成5
 
-    samei=grid[_x][_y];
-    subBomb(_x, _y);
+    bombTarget=grid[x][y];
+    subBomb(x, y);
   }
 
-  void subBomb(int _x, int _y) {//
-    state[_x][_y]=5;
-    grid[_x][_y]=5;
-    if (_x>0) {
-      if (grid[_x-1][_y]==samei)subBomb(_x-1, _y);
+  void subBomb(int x, int y) {//
+    state[x][y]=5;
+    grid[x][y]=5;
+    if (x>0) {
+      if (grid[x-1][y]==bombTarget)subBomb(x-1, y);
     }
-    if (_x<gridW-1) {
-      if (grid[_x+1][_y]==samei)subBomb(_x+1, _y);
+    if (x<gridW-1) {
+      if (grid[x+1][y]==bombTarget)subBomb(x+1, y);
     }
-    if (_y>0) {
-      if (grid[_x][_y-1]==samei)subBomb(_x, _y-1);
+    if (y>0) {
+      if (grid[x][y-1]==bombTarget)subBomb(x, y-1);
     }
-    if (_y<gridH-2) {
-      if (grid[_x][_y+1]==samei)subBomb(_x, _y+1);
+    if (y<gridH-2) {
+      if (grid[x][y+1]==bombTarget)subBomb(x, y+1);
     }
   }
   void findSix() {
@@ -577,7 +577,7 @@ class player {
       }
     }
   }
-  void BombBall() {
+  void bombBall() {
     for (int i=0; i<gridW; i++) {
       for (int j=0; j<gridH-1; j++) {
         if (state[i][j]==5) {
@@ -600,8 +600,8 @@ class player {
 
   //-----------------------增加球-------------------------
   void addBalls() {
-    addballs.stop();
-    addballs.play();
+    soundAddBalls.stop();
+    soundAddBalls.play();
     for (int i = 0; i < gridW; i++) {
       for (int j = gridH-2; j >= 0; j--) {
         grid[i][j+1] = grid[i][j];
@@ -663,17 +663,17 @@ class player {
   void comboSound() {
     if (playerIndex==1) {
       for (int i = 0; i < 9; i++) {
-        comboL[i].stop();
-        if (combo == i+1) comboL[i].play();
+        soundComboL[i].stop();
+        if (combo == i+1) soundComboL[i].play();
       }
-      if (combo > 9) comboL[8].play();
+      if (combo > 9) soundComboL[8].play();
     }
     if (playerIndex==2) {
       for (int i = 0; i < 9; i++) {
-        comboR[i].stop();
-        if (combo == i+1) comboR[i].play();
+        soundComboR[i].stop();
+        if (combo == i+1) soundComboR[i].play();
       }
-      if (combo > 9) comboR[8].play();
+      if (combo > 9) soundComboR[8].play();
     }
   }
 }

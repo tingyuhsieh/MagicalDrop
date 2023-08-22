@@ -1,51 +1,52 @@
 import processing.sound.*;
-SoundFile[] comboR = new SoundFile[9];
-SoundFile[] comboL = new SoundFile[9];
-SoundFile addballs, down, up, BGM;
+SoundFile[] soundComboR = new SoundFile[9];
+SoundFile[] soundComboL = new SoundFile[9];
+SoundFile soundAddBalls, soundBallDown, soundBallUp, soundBgm;
 
-PImage red, yellow, green, blue, empty;
-PImage goddess, devil;
-PImage bg;
-PImage win, lose;
-player player1, player2;
+PImage imgRedBall, imgYellowBall, imgGreenBall, imgBlueBall, imgEmpty;
+PImage imgGoddess, imgDevil;
+PImage imgBg;
+PImage imgWin, imgLose;
+PImage[] imgNum = new PImage[10];
+
+Player player1, player2;
 Runtime runtime;
-PImage[] num = new PImage[10];
 int mode;
 
 
 void setup() {
   size(900, 650, P3D);
   runtime=java.lang.Runtime.getRuntime();
-  player1=new player(1);
-  player2=new player(2);
+  player1=new Player(1);
+  player2=new Player(2);
 
   mode = 0;
 
-  red = loadImage("red2.png");
-  yellow = loadImage("yellow2.png");
-  green = loadImage("green2.png");
-  blue = loadImage("blue2.png");
-  empty = loadImage("empty.png");
-  bg = loadImage("bg.jpg");
-  win = loadImage("win.png");
-  lose = loadImage("lose.png");
+  imgRedBall = loadImage("redBall.png");
+  imgYellowBall = loadImage("yellowBall.png");
+  imgGreenBall = loadImage("greenBall.png");
+  imgBlueBall = loadImage("blueBall.png");
+  imgEmpty = loadImage("empty.png");
+  imgBg = loadImage("bg.jpg");
+  imgWin = loadImage("win.png");
+  imgLose = loadImage("lose.png");
   for (int i = 0; i < 10; i++) {
-    num[i] = loadImage(i + ".png");
+    imgNum[i] = loadImage(i + ".png");
   }
 
   for (int i = 0; i < 9; i++) {
-    comboR[i] = new SoundFile(this, "combo" + (i+1) + ".mp3");
-    comboL[i] = new SoundFile(this, "combo" + (i+1) + ".mp3");
+    soundComboR[i] = new SoundFile(this, "combo" + (i+1) + ".mp3");
+    soundComboL[i] = new SoundFile(this, "combo" + (i+1) + ".mp3");
   }
 
-  addballs = new SoundFile(this, "addballs.mp3");
-  down = new SoundFile(this, "down.mp3");
-  up = new SoundFile(this, "up.mp3");
+  soundAddBalls = new SoundFile(this, "addBalls.mp3");
+  soundBallDown = new SoundFile(this, "ballDown.mp3");
+  soundBallUp = new SoundFile(this, "ballUp.mp3");
 
-  addballs.amp(1.0);
+  soundAddBalls.amp(1.0);
 
-  goddess=loadImage("goddess.png");
-  devil=loadImage("devil.png");
+  imgGoddess=loadImage("goddess.png");
+  imgDevil=loadImage("devil.png");
 }
 
 void draw() {
@@ -54,11 +55,11 @@ void draw() {
   }
   background(0);
   noTint();
-  image(bg, 350, 0);
+  image(imgBg, 350, 0);
 
-  player1.drawPlayer(goddess);
+  player1.drawPlayer(imgGoddess);
   translate(width-350, 0, 0);
-  player2.drawPlayer(devil);
+  player2.drawPlayer(imgDevil);
   if (mode == 1) {
     if (player1.bombCount==player1.bombtime-1) {
 
@@ -82,12 +83,12 @@ void draw() {
 
   noTint();
   if (mode == 211 || mode == 221 || mode == 231) {
-    image(lose, 0, 450);
-    image(win, -550, 450);
+    image(imgLose, 0, 450);
+    image(imgWin, -550, 450);
   } else if (mode == 212 || mode == 222 || mode == 232) {
 
-    image(lose, -550, 450);
-    image(win, 0, 450);
+    image(imgLose, -550, 450);
+    image(imgWin, 0, 450);
   }
 }
 
