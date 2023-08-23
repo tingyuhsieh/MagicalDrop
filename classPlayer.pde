@@ -2,11 +2,11 @@ class Player {
 
   int [][] grid;
   int [][] state;
-  int lines, flash;
-  int gridW, gridH, posX, posY, nBalls, bombTarget, startY, buttColor, gotColor, butt, deadButt, ballY, rectSize, noBall;
+  int lines;
+  int gridW, gridH, posX, posY, nBalls, bombTarget, startY, buttColor, gotColor, butt, ballY, rectSize, noBall;
   boolean gotBalls, bomb, ballDown, ballUp, isBall, delayStart, stopCombo;
   int combo=0;
-  int v, delay, delaytime;
+  int delay, delaytime;
   color c;
   boolean comboPlus;
   boolean attacking;
@@ -30,8 +30,6 @@ class Player {
     nBalls = 0;
     ballY = 0;
     noBall = 0;
-    v = 0;
-    flash = 1;
     delaytime=100;
     delay = delaytime;
     isBall=false;
@@ -47,7 +45,6 @@ class Player {
     ballDown = false;
     ballUp = false;
     stopCombo = false;
-    deadButt = 1;
     lines = 0;
     attacking = false;
 
@@ -169,24 +166,7 @@ class Player {
         image(imgBlueBall, posX*rectSize, posY*rectSize);
       }
       //----------------------------死線--------------------------------
-      //for (int j = gridH-2; j >= 0; j--) {
-      //  for (int i = 0; i <gridW; i++) {
-      //    if (grid[i][j] != 0&&grid[i][j] != 5) {
-      //      deadButt = j+1;
-      //      break;
-      //    } else {
-      //      deadButt =0;
-      //    }
-      //  }
-      //}
-      //if (posY-deadButt<7 && posY-deadButt>=5) flash = 1;
-      //else if (posY-deadButt<5 && posY-deadButt>=3) flash = 3;
-      //else if (posY-deadButt<3 && posY-deadButt>=1) flash = 5;
-      float a = sin(radians((frameCount%(360/flash))*flash))*127.5+127.5;
-      pushMatrix();
-      stroke(255, a, a);
-      line(0*rectSize, (gridH-1)*rectSize, gridW*rectSize, (gridH-1)*rectSize);
-      popMatrix();
+      drawDeadLine();
       //--------------------------先消完目標數量的勝利----------------------
       if (bombN<=0) { 
         if (playerIndex==1) {
@@ -643,11 +623,33 @@ class Player {
     }
   }
 
+  //----------------Deadline----------------------
+  void drawDeadLine() {
+    int flash = 1 ;
+    //int deadButt=1;
+    //for (int j = gridH-2; j >= 0; j--) {
+    //  for (int i = 0; i <gridW; i++) {
+    //    if (grid[i][j] != 0&&grid[i][j] != 5) {
+    //      deadButt = j+1;
+    //      break;
+    //    } else {
+    //      deadButt =0;
+    //    }
+    //  }
+    //}
+    //if (posY-deadButt<7 && posY-deadButt>=5) flash = 1;
+    //else if (posY-deadButt<5 && posY-deadButt>=3) flash = 3;
+    //else if (posY-deadButt<3 && posY-deadButt>=1) flash = 5;
+    float a = sin(radians((frameCount%(360/flash))*flash))*127.5+127.5;
+    pushMatrix();
+    stroke(255, a, a);
+    line(0*rectSize, (gridH-1)*rectSize, gridW*rectSize, (gridH-1)*rectSize);
+    popMatrix();
+  }
   //----------------line----------------------
   void drawLine() {
     strokeWeight(3);
-    if (v < 10) v++;
-    else v = 0;
+    int v =frameCount%10;
     for (int i = posY; i > butt; i--) {
       for (int j = 0; j < 50; j+=10)
         if (gotBalls) {
