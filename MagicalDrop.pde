@@ -15,7 +15,7 @@ int mode;
 
 
 void setup() {
-  size(900, 650, P3D);
+  size(900, 650);
   runtime=java.lang.Runtime.getRuntime();
   player1=new Player(1);
   player2=new Player(2);
@@ -58,7 +58,7 @@ void draw() {
   image(imgBg, 350, 0);
 
   player1.drawPlayer(imgGoddess);
-  translate(width-350, 0, 0);
+  translate(width-350, 0);
   player2.drawPlayer(imgDevil);
   if (mode == 1) {
     if (player1.bombCount==player1.bombtime-1) {
@@ -86,7 +86,6 @@ void draw() {
     image(imgLose, 0, 450);
     image(imgWin, -550, 450);
   } else if (mode == 212 || mode == 222 || mode == 232) {
-
     image(imgLose, -550, 450);
     image(imgWin, 0, 450);
   }
