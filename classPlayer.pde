@@ -1,22 +1,37 @@
 class Player {
 
-  int [][] grid;
-  int [][] state;
-  int lines;
-  int gridW, gridH, posX, posY, nBalls, bombTarget, startY, buttColor, gotColor, butt, ballY, rectSize, noBall;
-  boolean gotBalls, bomb, ballDown, ballUp, isBall, delayStart, stopCombo;
+  int [][] grid; //儲存球的類型資訊 0:空格, 1:紅, 2:黃, 3:綠, 4:藍, 5:爆破中
+  int [][] state; //儲存球的狀態資訊 0:正常, 5:爆破中, 6:往上飄的球
+
+  int rectSize; //一格的大小
+  int gridW, gridH;
+  int posX, posY; //玩家的位置
+  int nBalls; //玩家持有的球數
+  boolean gotBalls; //玩家是否持有球
+  boolean isBall; //底部是否有球
+  color c; //玩家球的顏色
+  int bombTarget; //觸發消除的顏色
+  int gotColor; //玩家持有球的顏色
+  int buttColor; //底部球的顏色(拿球時使用)
+  int butt; //底部空格(不包含5)的位置y(使用於line以及拿球)
+  int noBall; //空格數量，空格太多時增加球
+
   int combo=0;
-  int delay, delaytime;
-  color c;
-  boolean comboPlus;
+  boolean bomb, stopCombo;
+  int delay, delaytime; //combo計算的延遲時間
+  boolean comboPlus; //有爆破引發的子爆破
+  boolean endBomb, endBombchild; //爆破結束, 子爆破結束
+  int bombCount, bombtime; //爆破的表演時間
+
+  int lines; //被攻擊所要增加的行數
   boolean attacking;
 
-  boolean endBomb, endBombchild;
-  int bombCount, bombtime;
+  boolean ballDown, ballUp; //丟球拿球動畫的判斷
+  int startY; //底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
+  int ballX, ballY; //丟球拿球動畫的位置
 
-  int ballX;
   int playerIndex;
-  int bombN;
+  int bombN; //結束遊戲所需消去的目標數量
 
   Player(int playerIndex) {
 
@@ -89,21 +104,16 @@ class Player {
         if (comboPlus==true||bomb==true)bombAndFly();
       }
       //---------------combo計算的delay,combo時播聲音一次--------------------
-
-      if (delayStart) {
-        if (delay == 0) {
+      if (!stopCombo) {
+        if (delay==0) {
           stopCombo = true;
-          delayStart = false;
-        } else {
-          if (delay == delaytime)comboSound();
+          combo=0;
+        } else if (delay>0) {
           delay--;
         }
-      }
-      if (stopCombo) {
+      } else {
         combo=0;
-        delayStart = false;
       }
-
       //------------------------畫出上面的球---------------
       for (int i = 0; i < gridW; i++) {
         for (int j = 0; j < gridH-1; j++) {
@@ -318,12 +328,10 @@ class Player {
 
     detectThree();//偵測是否三個相連(是否觸發消除)
     if (bomb) {//有待爆球的情況
-      combo+=1;
+      combo();
       colorReadyBomb(posX, startY+this.nBalls-1);
       findSix();
       endBomb=false;
-      delayStart = true;
-      delay = delaytime;
     } else if (endBomb==true) {
       for (int x=0; x<gridW; x++) {//死亡判定
         if (grid[x][posY]!=0&&grid[x][posY]!=5) {
@@ -366,11 +374,9 @@ class Player {
     }
 
     if (comboPlus) {//有待爆球的情況
-      combo+=1;
+      combo();
       findSix();
       endBombchild=false;
-      delayStart = true;
-      delay = delaytime;
     }
   }
   //-----------------BallControls------------
@@ -546,7 +552,7 @@ class Player {
       if (grid[x][y+1]==bombTarget)subBomb(x, y+1);
     }
   }
-  void findSix() {
+  void findSix() { //將正在爆破的球下方的球設為6=>等待往上飄的球
     for (int i=0; i<gridW; i++) {
       for (int j=0; j<gridH-1; j++) {
         if (state[i][j] == 5) {
@@ -605,6 +611,13 @@ class Player {
     }
   }
 
+  //---------------觸發combo------------------
+  void combo() {
+    stopCombo=false;
+    combo+=1;
+    delay = delaytime;
+    comboSound();
+  }
   //---------------攻擊加行-------------------
   void addLines() {
     if (lines < 8) lines++;

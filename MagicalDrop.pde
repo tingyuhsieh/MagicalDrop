@@ -11,7 +11,12 @@ PImage[] imgNum = new PImage[10];
 
 Player player1, player2;
 Runtime runtime;
-int mode;
+
+int mode; 
+// 0: 等待開始, 1: 遊戲中
+// 211:玩家1勝利(先消除完目標數量), 212:玩家2勝利(先消除完目標數量)
+// 221:玩家1勝利(對手自殺), 222:玩家2勝利(對手自殺)
+// 231:玩家1勝利(K.O.對手), 232:玩家2勝利(K.O.對手)
 
 
 void setup() {
