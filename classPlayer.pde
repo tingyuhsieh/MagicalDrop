@@ -7,7 +7,6 @@ class Player {
   int gridW, gridH;
   int posX, posY; //玩家的位置
   int nBalls; //玩家持有的球數
-  boolean gotBalls; //玩家是否持有球
   boolean isBall; //底部是否有球
   color c; //玩家球的顏色
   int bombTarget; //觸發消除的顏色
@@ -53,7 +52,6 @@ class Player {
     endBomb=true;
     endBombchild=true;
     comboPlus=false;
-    gotBalls = false;
     bomb=false;
     ballDown = false;
     ballUp = false;
@@ -238,7 +236,7 @@ class Player {
       buttHasBall();//偵測底部的球是不是可以拿的球
       if (isBall) {//是可以拿的球才判斷是不是可以拿的顏色
         getButtColor(); 
-        if (nBalls==0) {//手上沒球
+        if (nBalls == 0) {//手上沒球
           takeBalls();
         } else {//手上有球,顏色相同才拿
           if (gotColor==buttColor) {
@@ -283,7 +281,6 @@ class Player {
       }
     }
     this.nBalls = 0;//丟完之後手上拿的球歸零
-    gotBalls = false;
   }
   void bombAndFly() {
 
@@ -352,7 +349,6 @@ class Player {
         grid[posX][j] = 0;
       } else if (grid[posX][j]!=0&&grid[posX][j]!=5)break;//由下往上偵測顏色不與玩家相同就跳出迴圈
     }
-    gotBalls = true;
   }
 
   void ballRun() {  //丟球拿球動畫(放在draw裡面)
@@ -608,7 +604,7 @@ class Player {
     int v =frameCount%10;
     for (int i = posY; i > butt; i--) {
       for (int j = 0; j < 50; j+=10)
-        if (gotBalls) {
+        if (nBalls > 0) {
           stroke(c);
           point((posX+0.5)*rectSize, i*rectSize-j-v);
         } else {
