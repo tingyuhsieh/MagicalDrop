@@ -484,14 +484,23 @@ class Player {
   void detectThree() {//偵測往上丟的球是否觸發引爆,且沒有引爆時會斷combo
     bomb=false;
     stopCombo = true;
-    if (startY+nBalls-2>=0) {
-      if (grid[posX][startY+nBalls-2]==grid[posX][startY+nBalls-1]) {
-        if (startY+nBalls-3>=0) {
-          if (grid[posX][startY+nBalls-3]==grid[posX][startY+nBalls-1]) {
-            bomb=true;
-            stopCombo = false;
-          }
+    if (nBalls>=3) {
+      bomb=true;
+      stopCombo = false;
+      return;
+    } else if (nBalls==2) {
+      if (startY>0) {
+        if (grid[posX][startY-1]==grid[posX][startY]) {
+          bomb=true;
+          stopCombo = false;
+          return;
         }
+      }
+    } else if (startY-1>0) {
+      if (grid[posX][startY-2]==grid[posX][startY-1]&&grid[posX][startY-1]==grid[posX][startY]) {
+        bomb=true;
+        stopCombo = false;
+        return;
       }
     }
   }
