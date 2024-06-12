@@ -220,21 +220,10 @@ class Player {
     //-----------------------左右移動------------------------
     if (playerIndex==1) {
       if (key == 'a' && posX > 0) {
-        if (gotBalls) {
-          grid[posX-1][posY]=grid[posX][posY];
-          grid[posX][posY]=0;
-          posX--;
-        } else {
-          posX--;
-        }
+        posX--;
+        
       } else if (key == 'd' && posX < gridW-1) {
-        if (gotBalls) {
-          grid[posX+1][posY]=grid[posX][posY];
-          grid[posX][posY]=0;
           posX++;
-        } else {
-          posX++;
-        }
       } 
       //---------------------上下拿球丟球---------------------
 
