@@ -215,90 +215,37 @@ class Player {
     popMatrix();
   }
 
-  void keyPressed() {
-    //---------------------player1--------------------------
+  void keyPressed(int leftKeyCode, int rightKeyCode, int upKeyCode, int downKeyCode) { 
     //-----------------------左右移動------------------------
-    if (playerIndex==1) {
-      if (key == 'a' && posX > 0) {
-        posX--;
-        
-      } else if (key == 'd' && posX < gridW-1) {
-          posX++;
-      } 
-      //---------------------上下拿球丟球---------------------
+    if (keyCode == leftKeyCode && posX > 0) {
+      posX--;
+    } else if (keyCode == rightKeyCode && posX < gridW-1) {
+      posX++;
+    } 
+    //---------------------上下拿球丟球---------------------
+    else if (keyCode == upKeyCode) { 
+      soundBallDown.stop();
 
-      else if (key=='s') { 
-        soundBallUp.stop();
+      if (nBalls > 0) {//如果手上有球就丟
         findStartY();
-        buttHasBall();//偵測底部的球是不是可以拿的球
-        if (isBall) {//是可以拿的球才判斷是不是可以拿的顏色
-          getButtColor(); 
-          if (gotBalls == false) {//手上沒球
+        throwAndWait(nBalls);
+        findStartY();//更新starty讓動畫正確
+        ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
+      } else ballUp=false;
+    } else if (keyCode == downKeyCode) {
+      soundBallUp.stop();
+      findStartY();
+      buttHasBall();//偵測底部的球是不是可以拿的球
+      if (isBall) {//是可以拿的球才判斷是不是可以拿的顏色
+        getButtColor(); 
+        if (nBalls==0) {//手上沒球
+          takeBalls();
+        } else {//手上有球,顏色相同才拿
+          if (gotColor==buttColor) {
             takeBalls();
-          } else {//手上有球,顏色相同才拿
-            if (gotColor==buttColor) {
-              takeBalls();
-            } else ballDown=false;
-          }
-        } else ballDown=false;
-      } else if (key =='w') {
-        soundBallDown.stop();
-
-        if (gotBalls) {//如果手上有球就丟
-          findStartY();
-          throwAndWait(nBalls);
-          findStartY();//更新starty讓動畫正確
-          ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
-        } else ballUp=false;
-      }
-    }
-
-    //---------------------player2----------------------------------------
-    //-----------------------左右移動------------------------
-    else if (playerIndex==2) {
-      if (keyCode == LEFT && posX > 0) {
-        if (gotBalls) {
-          grid[posX-1][posY]=grid[posX][posY];
-          grid[posX][posY]=0;
-          posX--;
-        } else {
-          posX--;
+          } else ballDown=false;
         }
-      } else if (keyCode == RIGHT && posX < gridW-1) {
-        if (gotBalls) {
-          grid[posX+1][posY]=grid[posX][posY];
-          grid[posX][posY]=0;
-          posX++;
-        } else {
-          posX++;
-        }
-      } 
-      //---------------------上下拿球丟球---------------------
-
-      else if (keyCode ==DOWN) { 
-        soundBallUp.stop();
-        findStartY();
-        buttHasBall();//偵測底部的球是不是可以拿的球
-        if (isBall) {//是可以拿的球才判斷是不是可以拿的顏色
-          getButtColor(); 
-          if (gotBalls == false) {//手上沒球
-            takeBalls();
-          } else {//手上有球,顏色相同才拿
-            if (gotColor==buttColor) {
-              takeBalls();
-            } else ballDown=false;
-          }
-        } else ballDown=false;
-      } else if (keyCode ==UP) {
-        soundBallDown.stop();
-
-        if (gotBalls) {//如果手上有球就丟
-          findStartY();
-          throwAndWait(nBalls);
-          findStartY();//更新starty讓動畫正確
-          ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
-        } else ballUp=false;
-      }
+      } else ballDown=false;
     }
   }
 

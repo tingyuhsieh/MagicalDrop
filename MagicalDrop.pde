@@ -99,8 +99,9 @@ void draw() {
 void keyPressed() {
 
   if (mode == 1) {
-    player1.keyPressed();
-    player2.keyPressed();
+    player1.keyPressed(java.awt.event.KeyEvent.VK_A, java.awt.event.KeyEvent.VK_D, 
+      java.awt.event.KeyEvent.VK_W, java.awt.event.KeyEvent.VK_S);
+    player2.keyPressed(LEFT, RIGHT, UP, DOWN);
   } else if (mode == 0) {
     if (key == '0') mode = 1;
   }
