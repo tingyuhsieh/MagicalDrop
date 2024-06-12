@@ -14,7 +14,6 @@ class Player {
   int gotColor; //玩家持有球的顏色
   int buttColor; //底部球的顏色(拿球時使用)
   int butt; //底部空格(不包含5)的位置y(使用於line以及拿球)
-  int noBall; //空格數量，空格太多時增加球
 
   int combo=0;
   boolean bomb, stopCombo;
@@ -44,7 +43,6 @@ class Player {
     startY=0;
     nBalls = 0;
     ballY = 0;
-    noBall = 0;
     delaytime=100;
     delay = delaytime;
     isBall=false;
@@ -143,7 +141,7 @@ class Player {
       }
       //--------------數空格 空格太多增加球-----------------
 
-      noBall = 0;
+      int noBall = 0;
       if (frameCount % 20 == 0) {
         for (int i = 0; i < gridW; i++) {
           for (int j = 0; j < 12; j++) {
