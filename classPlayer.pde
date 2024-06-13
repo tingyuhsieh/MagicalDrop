@@ -497,7 +497,7 @@ class Player {
     if (y>0) {
       if (grid[x][y-1]==bombTarget)subBomb(x, y-1);
     }
-    if (y<gridH-2) {
+    if (y<gridH-1) {
       if (grid[x][y+1]==bombTarget)subBomb(x, y+1);
     }
   }
