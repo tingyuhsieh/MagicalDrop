@@ -60,15 +60,15 @@ class Player {
     attacking = false;
 
 
-    grid = new int [gridW][gridH*2];
-    state = new int [gridW][gridH*2];
+    grid = new int [gridW][gridH];
+    state = new int [gridW][gridH];
     for (int i = 0; i < gridW; i++) {
-      for (int j = 0; j < gridH*2; j++) {
+      for (int j = 0; j < gridH; j++) {
         grid[i][j] = 0;
       }
     }
     for (int i = 0; i < gridW; i++) {
-      for (int j = 0; j < gridH*2; j++) {
+      for (int j = 0; j < gridH; j++) {
         state[i][j] = 0;
       }
     }
@@ -254,14 +254,21 @@ class Player {
     ballUp = true;
     ballDown = false;
 
-    for (int i=startY; i<startY+nBalls; i++) {
+
+    for (int i=startY; i<startY+nBalls&&i<gridH; i++) {
       grid[posX][i]=gotColor;
     } 
 
     detectThree();//偵測是否三個相連(是否觸發消除)
     if (bomb) {//有待爆球的情況
       combo();
-      colorReadyBomb(posX, startY+this.nBalls-1);
+      if (startY+this.nBalls-1>gridH-1)
+      {
+        colorReadyBomb(posX, gridH-1);
+      } else 
+      {
+        colorReadyBomb(posX, startY+this.nBalls-1);
+      }
       findSix();
       endBomb=false;
     } else if (endBomb==true) {
