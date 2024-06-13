@@ -113,7 +113,7 @@ class Player {
       }
       //------------------------畫出上面的球---------------
       for (int i = 0; i < gridW; i++) {
-        for (int j = 0; j < gridH-1; j++) {
+        for (int j = 0; j < gridH; j++) {
 
           if (grid[i][j] == 1) image(imgRedBall, i*rectSize, j*rectSize);
           else if (grid[i][j] == 2) image(imgYellowBall, i*rectSize, j*rectSize);
@@ -514,7 +514,7 @@ class Player {
   }
   void bombBall() {
     for (int i=0; i<gridW; i++) {
-      for (int j=0; j<gridH-1; j++) {
+      for (int j=0; j<gridH; j++) {
         if (state[i][j]==5) {
           grid[i][j]=0;
           state[i][j]=0;
