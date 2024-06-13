@@ -1,10 +1,14 @@
+final int RECT_SIZE = 50; //一格的大小 //<>//
+final int ROW_NUM = 7; //行數
+final int COL_NUM = 13; //列數
+final int BOMBING_TIME = 15; //爆破的表演時間
+final int COMBO_VAILD_DURATION = 100; //combo計算的有效期間
+
 class Player {
 
   int [][] grid; //儲存球的類型資訊 0:空格, 1:紅, 2:黃, 3:綠, 4:藍, 5:爆破中
   int [][] state; //儲存球的狀態資訊 0:正常, 5:爆破中, 6:往上飄的球
 
-  int rectSize; //一格的大小
-  int gridW, gridH;
   int deadlinePos; //出局的界線，在該位置或超出界線的球則玩家被判出局
   int posX, posY; //玩家的位置
   int nBalls; //玩家持有的球數
@@ -17,10 +21,10 @@ class Player {
 
   int combo=0;
   boolean bomb, stopCombo;
-  int delay, delaytime; //combo計算的延遲時間
+  int comboValidTime;
   boolean comboPlus; //有爆破引發的子爆破
   boolean endBomb, endBombchild; //爆破結束, 子爆破結束
-  int bombCount, bombtime; //爆破的表演時間
+  int bombCount;
 
   int lines; //被攻擊所要增加的行數
   boolean attacking;
@@ -36,21 +40,16 @@ class Player {
   Player(int playerIndex) {
 
     this.playerIndex=playerIndex;
-    rectSize = 50;
-    gridW = 7;
-    gridH = 13;
     deadlinePos = 12;
-    posX = 3;
-    posY = gridH-1;
+    posX = ROW_NUM/2;
+    posY = COL_NUM-1;
     startY=0;
     nBalls = 0;
     ballY = 0;
-    delaytime=100;
-    delay = delaytime;
+    comboValidTime = COMBO_VAILD_DURATION;
     isBall=false;
 
     bombTargetNum=300;
-    bombtime=15;
     bombCount=0;
     endBomb=true;
     endBombchild=true;
@@ -63,15 +62,15 @@ class Player {
     attacking = false;
 
 
-    grid = new int [gridW][gridH];
-    state = new int [gridW][gridH];
-    for (int i = 0; i < gridW; i++) {
-      for (int j = 0; j < gridH; j++) {
+    grid = new int [ROW_NUM][COL_NUM];
+    state = new int [ROW_NUM][COL_NUM];
+    for (int i = 0; i < ROW_NUM; i++) {
+      for (int j = 0; j < COL_NUM; j++) {
         grid[i][j] = 0;
       }
     }
-    for (int i = 0; i < gridW; i++) {
-      for (int j = 0; j < gridH; j++) {
+    for (int i = 0; i < ROW_NUM; i++) {
+      for (int j = 0; j < COL_NUM; j++) {
         state[i][j] = 0;
       }
     }
@@ -85,10 +84,10 @@ class Player {
       ballRun();
       //-----------------bomb的時間&bomb開始結束判定-------------------
       if (endBomb==false) {
-        if (bombCount==0)bombCount=bombtime;
+        if (bombCount==0)bombCount=BOMBING_TIME;
       }
       if (endBombchild==false) {
-        if (bombCount==0)bombCount=bombtime;
+        if (bombCount==0)bombCount=BOMBING_TIME;
       }
 
       if (bombCount>0) {
@@ -102,32 +101,32 @@ class Player {
       if (endBomb==true&&endBombchild==true) {
         if (comboPlus==true||bomb==true)bombAndFly();
       }
-      //---------------combo計算的delay,combo時播聲音一次--------------------
+      //---------------combo計算的有效時間,combo時播聲音一次--------------------
       if (!stopCombo) {
-        if (delay==0) {
+        if (comboValidTime==0) {
           stopCombo = true;
           combo=0;
-        } else if (delay>0) {
-          delay--;
+        } else if (comboValidTime>0) {
+          comboValidTime--;
         }
       } else {
         combo=0;
       }
       //------------------------畫出上面的球---------------
-      for (int i = 0; i < gridW; i++) {
-        for (int j = 0; j < gridH; j++) {
+      for (int i = 0; i < ROW_NUM; i++) {
+        for (int j = 0; j < COL_NUM; j++) {
 
-          if (grid[i][j] == 1) image(imgRedBall, i*rectSize, j*rectSize);
-          else if (grid[i][j] == 2) image(imgYellowBall, i*rectSize, j*rectSize);
-          else if (grid[i][j] == 3) image(imgGreenBall, i*rectSize, j*rectSize);
-          else if (grid[i][j] == 4) image(imgBlueBall, i*rectSize, j*rectSize);
+          if (grid[i][j] == 1) image(imgRedBall, i*RECT_SIZE, j*RECT_SIZE);
+          else if (grid[i][j] == 2) image(imgYellowBall, i*RECT_SIZE, j*RECT_SIZE);
+          else if (grid[i][j] == 3) image(imgGreenBall, i*RECT_SIZE, j*RECT_SIZE);
+          else if (grid[i][j] == 4) image(imgBlueBall, i*RECT_SIZE, j*RECT_SIZE);
           else if (grid[i][j] == 5) {
             pushMatrix();
             if (frameCount%4 == 0) fill(255, 100, 0);
             else if (frameCount%3 == 1) fill(0, 255, 100);
             else fill(100, 0, 255);
             noStroke();
-            ellipse((i+0.5)*rectSize, (j+0.5)*rectSize, rectSize, rectSize);
+            ellipse((i+0.5)*RECT_SIZE, (j+0.5)*RECT_SIZE, RECT_SIZE, RECT_SIZE);
             popMatrix();
           }
           //if (state[i][j]==6) {
@@ -144,7 +143,7 @@ class Player {
 
       int noBall = 0;
       if (frameCount % 20 == 0) {
-        for (int i = 0; i < gridW; i++) {
+        for (int i = 0; i < ROW_NUM; i++) {
           for (int j = 0; j < 12; j++) {
             if (grid[i][j] == 0) noBall++;
           }
@@ -160,19 +159,19 @@ class Player {
       //--------------------------------玩家球的顏色------------------------
       if (gotColor == 0) {
         c = color(255, 255, 255);
-        image(imgEmpty, posX*rectSize, posY*rectSize);
+        image(imgEmpty, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 1) {
         c = color(255, 0, 0);
-        image(imgRedBall, posX*rectSize, posY*rectSize);
+        image(imgRedBall, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 2) {
         c = color(255, 255, 0);
-        image(imgYellowBall, posX*rectSize, posY*rectSize);
+        image(imgYellowBall, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 3) {
         c = color(0, 255, 0);
-        image(imgGreenBall, posX*rectSize, posY*rectSize);
+        image(imgGreenBall, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 4) {
         c = color(0, 0, 255);
-        image(imgBlueBall, posX*rectSize, posY*rectSize);
+        image(imgBlueBall, posX*RECT_SIZE, posY*RECT_SIZE);
       }
       //----------------------------死線--------------------------------
       drawDeadLine();
@@ -220,7 +219,7 @@ class Player {
     //-----------------------左右移動------------------------
     if (keyCode == leftKeyCode && posX > 0) {
       posX--;
-    } else if (keyCode == rightKeyCode && posX < gridW-1) {
+    } else if (keyCode == rightKeyCode && posX < ROW_NUM-1) {
       posX++;
     } 
     //---------------------上下拿球丟球---------------------
@@ -258,17 +257,17 @@ class Player {
     ballDown = false;
 
 
-    for (int i=startY; i<startY+nBalls&&i<gridH; i++) {
+    for (int i=startY; i<startY+nBalls&&i<COL_NUM; i++) {
       grid[posX][i]=gotColor;
     } 
 
     detectThree();//偵測是否三個相連(是否觸發消除)
     if (bomb) {//有待爆球的情況
       combo();
-      if (startY+this.nBalls-1>gridH-1)
+      if (startY+this.nBalls-1>COL_NUM-1)
       {
-        bombingNum+=startY+this.nBalls-1-(gridH-1);
-        colorReadyBomb(posX, gridH-1);
+        bombingNum+=startY+this.nBalls-1-(COL_NUM-1);
+        colorReadyBomb(posX, COL_NUM-1);
       } else 
       {
         colorReadyBomb(posX, startY+this.nBalls-1);
@@ -276,7 +275,7 @@ class Player {
       findSix();
       endBomb=false;
     } else if (endBomb==true) {
-      for (int x=0; x<gridW; x++) {//死亡判定
+      for (int x=0; x<ROW_NUM; x++) {//死亡判定
         if (grid[x][deadlinePos]!=0&&grid[x][deadlinePos]!=5) {
           if (playerIndex==1) {
             println("player1 Suicide");
@@ -298,7 +297,7 @@ class Player {
     bombBall();
     detectHole();//球往上飄
     comboPlus=false;
-    for (int i = 0; i < gridW; i++) {
+    for (int i = 0; i < ROW_NUM; i++) {
       for (int j = 0; j < deadlinePos; j++) {//偵測往上飄的所有球
         if (state[i][j]==6) {
           detectThree(i, j);//偵測是否三個相連(是否觸發消除)
@@ -335,7 +334,7 @@ class Player {
     }
   }
   void getButt() {//不斷更新底部空格(不包含5)的位置(使用於line以及拿球)
-    for (int j = gridH-2; j >= 0; j--) {
+    for (int j = COL_NUM-2; j >= 0; j--) {
       if (grid[posX][j] != 0&&grid[posX][j] != 5) {
         butt = j+1;
         break;
@@ -366,17 +365,17 @@ class Player {
 
     if (ballDown && ballY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
       ballY++;
-      if (gotColor == 1) image(imgRedBall, posX*rectSize, ballY*rectSize);
-      else if (gotColor == 2) image(imgYellowBall, posX*rectSize, ballY*rectSize);
-      else if (gotColor == 3) image(imgGreenBall, posX*rectSize, ballY*rectSize);
-      else if (gotColor == 4) image(imgBlueBall, posX*rectSize, ballY*rectSize);
+      if (gotColor == 1) image(imgRedBall, posX*RECT_SIZE, ballY*RECT_SIZE);
+      else if (gotColor == 2) image(imgYellowBall, posX*RECT_SIZE, ballY*RECT_SIZE);
+      else if (gotColor == 3) image(imgGreenBall, posX*RECT_SIZE, ballY*RECT_SIZE);
+      else if (gotColor == 4) image(imgBlueBall, posX*RECT_SIZE, ballY*RECT_SIZE);
     } else if (ballUp && ballY >= startY) {//丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
       if (ballY > startY) {
         ballY--;      
-        if (gotColor == 1) image(imgRedBall, ballX*rectSize, ballY*rectSize);
-        else if (gotColor == 2) image(imgYellowBall, ballX*rectSize, ballY*rectSize);
-        else if (gotColor == 3) image(imgGreenBall, ballX*rectSize, ballY*rectSize);
-        else if (gotColor == 4) image(imgBlueBall, ballX*rectSize, ballY*rectSize);
+        if (gotColor == 1) image(imgRedBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+        else if (gotColor == 2) image(imgYellowBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+        else if (gotColor == 3) image(imgGreenBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+        else if (gotColor == 4) image(imgBlueBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
       } else gotColor=0;//動畫跑完下面的球才歸零(先歸零或用starty動畫都會消失)(使用starty因為不會略過5所以消除時不會有動畫)
     }
   }
@@ -384,7 +383,7 @@ class Player {
 
   void detectHole() {//球上有空格就往上飄
     boolean hole=false;
-    for (int x=0; x<gridW; x++) {
+    for (int x=0; x<ROW_NUM; x++) {
 
       for (int y=0; y<deadlinePos-1; y++) {
         if (grid[x][y]==0&&grid[x][y+1]!=0) {//檢查是否有空格
@@ -412,7 +411,7 @@ class Player {
 
   void findStartY() {//找底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
 
-    for (int j = gridH-2; j >= 0; j--) {
+    for (int j = COL_NUM-2; j >= 0; j--) {
       if (grid[posX][j] != 0) {
         startY = j+1;
         break;
@@ -493,18 +492,18 @@ class Player {
     if (x>0) {
       if (grid[x-1][y]==bombTarget)subBomb(x-1, y);
     }
-    if (x<gridW-1) {
+    if (x<ROW_NUM-1) {
       if (grid[x+1][y]==bombTarget)subBomb(x+1, y);
     }
     if (y>0) {
       if (grid[x][y-1]==bombTarget)subBomb(x, y-1);
     }
-    if (y<gridH-1) {
+    if (y<COL_NUM-1) {
       if (grid[x][y+1]==bombTarget)subBomb(x, y+1);
     }
   }
   void findSix() { //將正在爆破的球下方的球設為6=>等待往上飄的球
-    for (int i=0; i<gridW; i++) {
+    for (int i=0; i<ROW_NUM; i++) {
       for (int j=0; j<deadlinePos; j++) {
         if (state[i][j] == 5) {
           if (j+1<deadlinePos) {
@@ -515,8 +514,8 @@ class Player {
     }
   }
   void bombBall() {
-    for (int i=0; i<gridW; i++) {
-      for (int j=0; j<gridH; j++) {
+    for (int i=0; i<ROW_NUM; i++) {
+      for (int j=0; j<COL_NUM; j++) {
         if (state[i][j]==5) {
           grid[i][j]=0;
           state[i][j]=0;
@@ -527,7 +526,7 @@ class Player {
     bombingNum=0;
   }
   void clearSix() {
-    for (int i=0; i<gridW; i++) {
+    for (int i=0; i<ROW_NUM; i++) {
       for (int j=0; j<deadlinePos; j++) {
         if (state[i][j] == 6) {
           state[i][j] =0;
@@ -540,15 +539,15 @@ class Player {
   void addBalls() {
     soundAddBalls.stop();
     soundAddBalls.play();
-    for (int i = 0; i < gridW; i++) {
-      for (int j = gridH-2; j >= 0; j--) {
+    for (int i = 0; i < ROW_NUM; i++) {
+      for (int j = COL_NUM-2; j >= 0; j--) { //<>//
         grid[i][j+1] = grid[i][j];
         state[i][j+1]=state[i][j];
       }
       grid[i][0] = int(random(1, 5));
       state[i][0]=0;
     }
-    for (int x=0; x<gridW; x++) {//死亡判定
+    for (int x=0; x<ROW_NUM; x++) {//死亡判定
       if (grid[x][deadlinePos]!=0&&grid[x][deadlinePos]!=5) {
         println("!!K.O!!");
         if (playerIndex==1) {
@@ -565,10 +564,10 @@ class Player {
 
   //---------------觸發combo------------------
   void combo() {
-    stopCombo=false;
+    stopCombo=false; //<>//
     combo+=1;
-    delay = delaytime;
-    comboSound();
+    comboValidTime = COMBO_VAILD_DURATION;
+    comboSound(); //<>//
   }
   //---------------攻擊加行-------------------
   void addLines() {
@@ -592,8 +591,8 @@ class Player {
   void drawDeadLine() {
     int flash = 1 ;
     //int deadButt=1;
-    //for (int j = gridH-2; j >= 0; j--) {
-    //  for (int i = 0; i <gridW; i++) {
+    //for (int j = COL_NUM-2; j >= 0; j--) {
+    //  for (int i = 0; i <ROW_NUM; i++) {
     //    if (grid[i][j] != 0&&grid[i][j] != 5) {
     //      deadButt = j+1;
     //      break;
@@ -608,7 +607,7 @@ class Player {
     float a = sin(radians((frameCount%(360/flash))*flash))*127.5+127.5;
     pushMatrix();
     stroke(255, a, a);
-    line(0 * rectSize, deadlinePos * rectSize, gridW * rectSize, deadlinePos * rectSize);
+    line(0 * RECT_SIZE, deadlinePos * RECT_SIZE, ROW_NUM * RECT_SIZE, deadlinePos * RECT_SIZE);
     popMatrix();
   }
   //----------------line----------------------
@@ -619,10 +618,10 @@ class Player {
       for (int j = 0; j < 50; j+=10)
         if (nBalls > 0) {
           stroke(c);
-          point((posX+0.5)*rectSize, i*rectSize-j-v);
+          point((posX+0.5)*RECT_SIZE, i*RECT_SIZE-j-v);
         } else {
           stroke(c);
-          point((posX+0.5)*rectSize, i*rectSize-j+v);
+          point((posX+0.5)*RECT_SIZE, i*RECT_SIZE-j+v);
         }
     }
   }

@@ -66,11 +66,11 @@ void draw() {
   translate(width-350, 0);
   player2.drawPlayer(imgDevil);
   if (mode == 1) {
-    if (player1.bombCount==player1.bombtime-1) {
+    if (player1.bombCount == BOMBING_TIME - 1) {
 
       if (player1.combo%2 ==0)player2.addLines();
     }
-    if (player2.bombCount==player2.bombtime-1) {
+    if (player2.bombCount == BOMBING_TIME - 1) {
 
       if (player2.combo%2 ==0)player1.addLines();
     }
