@@ -5,6 +5,7 @@ class Player {
 
   int rectSize; //一格的大小
   int gridW, gridH;
+  int deadlinePos; //出局的界線，在該位置或超出界線的球則玩家被判出局
   int posX, posY; //玩家的位置
   int nBalls; //玩家持有的球數
   boolean isBall; //底部是否有球
@@ -38,6 +39,7 @@ class Player {
     rectSize = 50;
     gridW = 7;
     gridH = 13;
+    deadlinePos = 12;
     posX = 3;
     posY = gridH-1;
     startY=0;
@@ -275,7 +277,7 @@ class Player {
       endBomb=false;
     } else if (endBomb==true) {
       for (int x=0; x<gridW; x++) {//死亡判定
-        if (grid[x][posY]!=0&&grid[x][posY]!=5) {
+        if (grid[x][deadlinePos]!=0&&grid[x][deadlinePos]!=5) {
           if (playerIndex==1) {
             println("player1 Suicide");
             println("player2 Win!");
@@ -297,7 +299,7 @@ class Player {
     detectHole();//球往上飄
     comboPlus=false;
     for (int i = 0; i < gridW; i++) {
-      for (int j = 0; j < gridH-1; j++) {//偵測往上飄的所有球
+      for (int j = 0; j < deadlinePos; j++) {//偵測往上飄的所有球
         if (state[i][j]==6) {
           detectThree(i, j);//偵測是否三個相連(是否觸發消除)
           if (bomb) {
@@ -352,7 +354,7 @@ class Player {
     gotColor = buttColor;//手上的球變成底部球的顏色
     ballY = startY;//讓動畫開始跑
 
-    for (int j = gridH-2; j >= 0; j--) {//把吸掉的球清空
+    for (int j = deadlinePos-1; j >= 0; j--) {//把吸掉的球清空
       if (grid[posX][j] == gotColor) {//計算顏色相同的球數
         nBalls++;       
         grid[posX][j] = 0;
@@ -384,7 +386,7 @@ class Player {
     boolean hole=false;
     for (int x=0; x<gridW; x++) {
 
-      for (int y=0; y<gridH-2; y++) {
+      for (int y=0; y<deadlinePos-1; y++) {
         if (grid[x][y]==0&&grid[x][y+1]!=0) {//檢查是否有空格
           hole=true;
           fillHole(x, y);
@@ -400,7 +402,7 @@ class Player {
   }
 
   void fillHole(int x, int y) {
-    for (int j=y; j<gridH-2; j++) {//往上移
+    for (int j=y; j<deadlinePos-1; j++) {//往上移
       grid[x][j]=grid[x][j+1];
       state[x][j]=state[x][j+1];
       grid[x][j+1]=0;
@@ -459,16 +461,16 @@ class Player {
       }
       if (y-1>=0) {
         if (grid[x][y-1]==grid[x][y]) {
-          if (y+1<gridH-1) {
+          if (y+1<deadlinePos) {
             if (grid[x][y+1]==grid[x][y]) {
               bomb=true;
             }
           }
         }
       }
-      if (y+1<gridH-1) {
+      if (y+1<deadlinePos) {
         if (grid[x][y+1]==grid[x][y]) {
-          if (y+2<gridH-1) {
+          if (y+2<deadlinePos) {
             if (grid[x][y+2]==grid[x][y]) {
               bomb=true;
             }
@@ -503,9 +505,9 @@ class Player {
   }
   void findSix() { //將正在爆破的球下方的球設為6=>等待往上飄的球
     for (int i=0; i<gridW; i++) {
-      for (int j=0; j<gridH-1; j++) {
+      for (int j=0; j<deadlinePos; j++) {
         if (state[i][j] == 5) {
-          if (j+1<gridH-1) {
+          if (j+1<deadlinePos) {
             if (state[i][j+1] != 5 && grid[i][j+1] != 0) state[i][j+1] = 6;
           }
         }
@@ -526,7 +528,7 @@ class Player {
   }
   void clearSix() {
     for (int i=0; i<gridW; i++) {
-      for (int j=0; j<gridH-1; j++) {
+      for (int j=0; j<deadlinePos; j++) {
         if (state[i][j] == 6) {
           state[i][j] =0;
         }
@@ -547,7 +549,7 @@ class Player {
       state[i][0]=0;
     }
     for (int x=0; x<gridW; x++) {//死亡判定
-      if (grid[x][posY]!=0&&grid[x][posY]!=5) {
+      if (grid[x][deadlinePos]!=0&&grid[x][deadlinePos]!=5) {
         println("!!K.O!!");
         if (playerIndex==1) {
           println("player2 Win!");
@@ -600,13 +602,13 @@ class Player {
     //    }
     //  }
     //}
-    //if (posY-deadButt<7 && posY-deadButt>=5) flash = 1;
-    //else if (posY-deadButt<5 && posY-deadButt>=3) flash = 3;
-    //else if (posY-deadButt<3 && posY-deadButt>=1) flash = 5;
+    //if (deadlinePos-deadButt<7 && deadlinePos-deadButt>=5) flash = 1;
+    //else if (deadlinePos-deadButt<5 && deadlinePos-deadButt>=3) flash = 3;
+    //else if (deadlinePos-deadButt<3 && deadlinePos-deadButt>=1) flash = 5;
     float a = sin(radians((frameCount%(360/flash))*flash))*127.5+127.5;
     pushMatrix();
     stroke(255, a, a);
-    line(0*rectSize, (gridH-1)*rectSize, gridW*rectSize, (gridH-1)*rectSize);
+    line(0 * rectSize, deadlinePos * rectSize, gridW * rectSize, deadlinePos * rectSize);
     popMatrix();
   }
   //----------------line----------------------
