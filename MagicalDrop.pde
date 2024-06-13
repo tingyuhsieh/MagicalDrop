@@ -22,8 +22,8 @@ int mode;
 void setup() {
   size(900, 650);
   runtime=java.lang.Runtime.getRuntime();
-  player1=new Player(1);
-  player2=new Player(2);
+  player1=new Player(1, 12, 300);
+  player2=new Player(2, 12, 300);
 
   mode = 0;
 

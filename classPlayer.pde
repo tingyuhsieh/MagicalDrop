@@ -37,10 +37,12 @@ class Player {
   int bombTargetNum; //結束遊戲所需消去的目標數量
   int bombingNum; //爆破中的數量
 
-  Player(int playerIndex) {
+  Player(int playerIndex, int deadlinePos, int bombTargetNum) {
 
-    this.playerIndex=playerIndex;
-    deadlinePos = 12;
+    this.playerIndex = playerIndex;
+    this.deadlinePos = deadlinePos >= COL_NUM ? (COL_NUM - 1) : deadlinePos;
+    this.bombTargetNum = bombTargetNum;
+
     posX = ROW_NUM/2;
     posY = COL_NUM-1;
     startY=0;
@@ -49,7 +51,6 @@ class Player {
     comboValidTime = COMBO_VAILD_DURATION;
     isBall=false;
 
-    bombTargetNum=300;
     bombCount=0;
     endBomb=true;
     endBombchild=true;
