@@ -29,7 +29,8 @@ class Player {
   int ballX, ballY; //丟球拿球動畫的位置
 
   int playerIndex;
-  int bombN; //結束遊戲所需消去的目標數量
+  int bombTargetNum; //結束遊戲所需消去的目標數量
+  int bombingNum; //爆破中的數量
 
   Player(int playerIndex) {
 
@@ -46,7 +47,7 @@ class Player {
     delay = delaytime;
     isBall=false;
 
-    bombN=300;
+    bombTargetNum=300;
     bombtime=15;
     bombCount=0;
     endBomb=true;
@@ -174,7 +175,7 @@ class Player {
       //----------------------------死線--------------------------------
       drawDeadLine();
       //--------------------------先消完目標數量的勝利----------------------
-      if (bombN<=0) { 
+      if (bombTargetNum<=0) { 
         if (playerIndex==1) {
           println("player1 achieved the goal first!");
           println("player1 Win!");
@@ -196,7 +197,7 @@ class Player {
   }
 
   void drawPoint(float posX, float posY) {
-    drawNum(bombN, 3, posX, posY);
+    drawNum(bombTargetNum, 3, posX, posY);
   }
 
   void drawNum(int number, int digits, float posX, float posY) {
@@ -264,6 +265,7 @@ class Player {
       combo();
       if (startY+this.nBalls-1>gridH-1)
       {
+        bombingNum+=startY+this.nBalls-1-(gridH-1);
         colorReadyBomb(posX, gridH-1);
       } else 
       {
@@ -485,6 +487,7 @@ class Player {
   void subBomb(int x, int y) {//
     state[x][y]=5;
     grid[x][y]=5;
+    bombingNum+=1;
     if (x>0) {
       if (grid[x-1][y]==bombTarget)subBomb(x-1, y);
     }
@@ -513,12 +516,13 @@ class Player {
     for (int i=0; i<gridW; i++) {
       for (int j=0; j<gridH-1; j++) {
         if (state[i][j]==5) {
-          bombN-=1;
           grid[i][j]=0;
           state[i][j]=0;
         }
       }
     }
+    bombTargetNum-=bombingNum;
+    bombingNum=0;
   }
   void clearSix() {
     for (int i=0; i<gridW; i++) {
