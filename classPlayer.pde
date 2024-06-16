@@ -28,7 +28,7 @@ class Player {
   int bombCount;
 
   int attackRows; //被攻擊所要增加的行數
-  boolean attacking;
+  int rowsWaitingToAdd; //等待加的行數
 
   boolean ballDown, ballUp; //丟球拿球動畫的判斷
   int startY; //底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
@@ -61,7 +61,7 @@ class Player {
     ballUp = false;
     stopCombo = false;
     attackRows = 0;
-    attacking = false;
+    rowsWaitingToAdd = 0;
 
 
     grid = new int [ROW_NUM][COL_NUM];
@@ -150,14 +150,16 @@ class Player {
             if (grid[i][j] == 0) noBall++;
           }
         }
-        if (noBall >= 56) addBalls();
+        if (noBall >= 56) rowsWaitingToAdd++;
       }
 
       //------------------自動加球-----------------
       if (frameCount % 480 == 460) {
-        //addBalls();
+        //rowsWaitingToAdd++;
       }
 
+      //-------------檢查是否需加球------------------
+      checkAddBalls();
       //--------------------------------玩家球的顏色------------------------
       if (gotColor == 0) {
         c = color(255, 255, 255);
@@ -515,7 +517,16 @@ class Player {
   }
 
   //-----------------------增加球-------------------------
+  void checkAddBalls() {
+    if (rowsWaitingToAdd > 0) {
+      if (frameCount%20 == 0) {
+        addBalls();
+      }
+    }
+  }
+
   void addBalls() {
+    rowsWaitingToAdd--;
     soundAddBalls.stop();
     soundAddBalls.play();
     for (int i = 0; i < ROW_NUM; i++) {
@@ -554,17 +565,10 @@ class Player {
   }
 
   //---------------受到攻擊--------------------
-  void attacked() {
-    attacking = true;
-    if (frameCount%20 == 0) {
-      if (attacking) {
-        if (attackRows > 0) {
-          addBalls();
-          attackRows--;
-        } else attacking = false;
-      }
-    }
-  }
+  void attacked() { //<>//
+    rowsWaitingToAdd += attackRows;
+    attackRows = 0;
+  } //<>//
 
   //----------------Deadline----------------------
   void drawDeadLine() {
