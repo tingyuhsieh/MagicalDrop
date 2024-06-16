@@ -78,13 +78,13 @@ void draw() {
     if (player2.stopCombo) player1.attacked();
 
     // drawCombo
-    player1.drawCombo(-240, 580);
-    player2.drawCombo(310, 580);
+    drawCombo(player1.combo, -240, 580);
+    drawCombo(player2.combo, 310, 580);
   }
 
   // drawPoint
-  player1.drawPoint(-113, 329);
-  player2.drawPoint(-47, 412);
+  drawPoint(player1.bombTargetNum, -113, 329);
+  drawPoint(player2.bombTargetNum, -47, 412);
 
   noTint();
   if (mode == 211 || mode == 221 || mode == 231) {
@@ -106,6 +106,29 @@ void keyPressed() {
     if (key == '0') mode = 1;
   }
 }
+
+  void drawCombo(int combo, float posX, float posY) {
+    if (combo>0)drawNum(combo, 2, posX, posY);
+  }
+
+  void drawPoint(int point, float posX, float posY) {
+    drawNum(point, 3, posX, posY);
+  }
+
+  void drawNum(int number, int digits, float posX, float posY) {
+    int imgWidth = 40;
+    int imgHeight = 60;
+
+    pushMatrix();
+    tint(255, 200);
+    scale(1, 1);
+    translate(posX, posY);
+    for (int i = 0; i < digits; i++) {
+      image(imgNum[floor(number/pow(10, i))%10], -imgWidth*i, 0, imgWidth, imgHeight);
+    }
+    popMatrix();
+  }
+  
 void garbageCollector() {
   runtime.gc();
 }

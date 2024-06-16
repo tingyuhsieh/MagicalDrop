@@ -193,29 +193,6 @@ class Player {
     }
   }
 
-  //----------------------畫出數字----------------------
-  void drawCombo(float posX, float posY) {
-    if (combo>0)drawNum(combo, 2, posX, posY);
-  }
-
-  void drawPoint(float posX, float posY) {
-    drawNum(bombTargetNum, 3, posX, posY);
-  }
-
-  void drawNum(int number, int digits, float posX, float posY) {
-    int imgWidth = 40;
-    int imgHeight = 60;
-
-    pushMatrix();
-    tint(255, 200);
-    scale(1, 1);
-    translate(posX, posY);
-    for (int i = 0; i < digits; i++) {
-      image(imgNum[floor(number/pow(10, i))%10], -imgWidth*i, 0, imgWidth, imgHeight);
-    }
-    popMatrix();
-  }
-
   void keyPressed(int leftKeyCode, int rightKeyCode, int upKeyCode, int downKeyCode) { 
     //-----------------------左右移動------------------------
     if (keyCode == leftKeyCode && posX > 0) {
