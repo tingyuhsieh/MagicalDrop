@@ -3,6 +3,7 @@ final int ROW_NUM = 7; //行數
 final int COL_NUM = 13; //列數
 final int BOMBING_TIME = 15; //爆破的表演時間
 final int COMBO_VAILD_DURATION = 100; //combo計算的有效期間
+final int ATTACK_ROWS_MAX = 8; //攻擊加行的上限
 
 class Player {
 
@@ -26,7 +27,7 @@ class Player {
   boolean endBomb, endBombchild; //爆破結束, 子爆破結束
   int bombCount;
 
-  int lines; //被攻擊所要增加的行數
+  int attackRows; //被攻擊所要增加的行數
   boolean attacking;
 
   boolean ballDown, ballUp; //丟球拿球動畫的判斷
@@ -59,7 +60,7 @@ class Player {
     ballDown = false;
     ballUp = false;
     stopCombo = false;
-    lines = 0;
+    attackRows = 0;
     attacking = false;
 
 
@@ -548,8 +549,8 @@ class Player {
     comboSound(); //<>//
   }
   //---------------攻擊加行-------------------
-  void addLines() {
-    if (lines < 8) lines++;
+  void addRows() {
+    if (attackRows < ATTACK_ROWS_MAX) attackRows++;
   }
 
   //---------------受到攻擊--------------------
@@ -557,9 +558,9 @@ class Player {
     attacking = true;
     if (frameCount%20 == 0) {
       if (attacking) {
-        if (lines > 0) {
+        if (attackRows > 0) {
           addBalls();
-          lines--;
+          attackRows--;
         } else attacking = false;
       }
     }

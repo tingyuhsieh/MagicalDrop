@@ -68,11 +68,11 @@ void draw() {
   if (mode == 1) {
     if (player1.bombCount == BOMBING_TIME - 1) {
 
-      if (player1.combo%2 ==0)player2.addLines();
+      if (player1.combo%2 ==0)player2.addRows();
     }
     if (player2.bombCount == BOMBING_TIME - 1) {
 
-      if (player2.combo%2 ==0)player1.addLines();
+      if (player2.combo%2 ==0)player1.addRows();
     }
     if (player1.stopCombo) player2.attacked();
     if (player2.stopCombo) player1.attacked();
