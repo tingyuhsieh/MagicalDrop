@@ -38,6 +38,8 @@ class Player {
   int bombTargetNum; //結束遊戲所需消去的目標數量
   int bombingNum; //爆破中的數量
 
+  Player opponent; //攻擊的玩家
+
   Player(int playerIndex, int deadlinePos, int bombTargetNum) {
 
     this.playerIndex = playerIndex;
@@ -59,7 +61,7 @@ class Player {
     bomb=false;
     ballDown = false;
     ballUp = false;
-    stopCombo = false;
+    stopCombo = true;
     attackRows = 0;
     rowsWaitingToAdd = 0;
 
@@ -78,6 +80,10 @@ class Player {
     }
   }
 
+  void setOpponentPlayer(Player opponent) {
+    this.opponent = opponent;
+  }
+
   void drawPlayer(PImage imgPlayer) {
     image(imgPlayer, 0, 0);
     if (mode == 1) {
@@ -85,11 +91,11 @@ class Player {
       drawLine();
       ballRun();
       //-----------------bomb的時間&bomb開始結束判定-------------------
-      if (endBomb==false) {
-        if (bombCount==0)bombCount=BOMBING_TIME;
-      }
-      if (endBombchild==false) {
-        if (bombCount==0)bombCount=BOMBING_TIME;
+      if (endBomb==false || endBombchild==false) {
+        if (bombCount==0) {
+          bombCount=BOMBING_TIME;
+          onBombBall();
+        }
       }
 
       if (bombCount>0) {
@@ -108,6 +114,7 @@ class Player {
         if (comboValidTime==0) {
           stopCombo = true;
           combo=0;
+          onComboEnd();
         } else if (comboValidTime>0) {
           comboValidTime--;
         }
@@ -570,6 +577,19 @@ class Player {
     attackRows = 0;
   } //<>//
 
+  //---------------攻擊對手--------------------
+  void onBombBall() { //每次消除球之後確認是否要加對手的行數
+    if (opponent == null) return;
+
+    if (combo%2 == 0) 
+      opponent.addRows();
+  }
+
+  void onComboEnd() { //combo結束後攻擊對手
+    if (opponent == null) return;
+
+    opponent.attacked();
+  }
   //----------------Deadline----------------------
   void drawDeadLine() {
     int flash = 1 ;

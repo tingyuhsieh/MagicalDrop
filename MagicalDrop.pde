@@ -24,6 +24,8 @@ void setup() {
   runtime=java.lang.Runtime.getRuntime();
   player1=new Player(1, 12, 300);
   player2=new Player(2, 12, 300);
+  player1.setOpponentPlayer(player2);
+  player2.setOpponentPlayer(player1);
 
   mode = 0;
 
@@ -66,17 +68,6 @@ void draw() {
   translate(width-350, 0);
   player2.drawPlayer(imgDevil);
   if (mode == 1) {
-    if (player1.bombCount == BOMBING_TIME - 1) {
-
-      if (player1.combo%2 ==0)player2.addRows();
-    }
-    if (player2.bombCount == BOMBING_TIME - 1) {
-
-      if (player2.combo%2 ==0)player1.addRows();
-    }
-    if (player1.stopCombo) player2.attacked();
-    if (player2.stopCombo) player1.attacked();
-
     // drawCombo
     drawCombo(player1.combo, -240, 580);
     drawCombo(player2.combo, 310, 580);
