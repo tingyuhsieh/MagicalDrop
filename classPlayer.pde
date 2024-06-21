@@ -21,9 +21,7 @@ class Player {
   int butt; //底部空格(不包含5)的位置y(使用於line以及拿球)
 
   int combo;
-  boolean bomb;
   int bombStartTime;
-  boolean comboPlus; //有爆破引發的子爆破
   boolean endBomb; //爆破結束
 
   int attackRows; //被攻擊所要增加的行數
@@ -54,9 +52,7 @@ class Player {
     isBall=false;
 
     endBomb=true;
-    comboPlus=false;
     combo = 0;
-    bomb=false;
     ballDown = false;
     ballUp = false;
     attackRows = 0;
@@ -91,7 +87,7 @@ class Player {
       if (endBomb==false) {
         if (millis() - bombStartTime > BOMBING_DURATION) {
           endBomb=true;
-          if (comboPlus==true||bomb==true)bombAndFly();
+          if (bombingNum >= 3)bombAndFly();
         }
       }
       //---------------檢查combo計算的有效時間,超過時結束combo------------------
@@ -228,14 +224,8 @@ class Player {
 
     if (checkBomb())//偵測是否三個相連(是否觸發消除)
     {
-      bomb = true;
-    } else //沒有觸發消除時會斷combo
-    {
-      bomb = false;
-      if (combo > 0) stopCombo();
-    }
-    if (bomb) {//有待爆球的情況
       startBomb();
+
       if (startY+this.nBalls-1>COL_NUM-1)
       {
         bombingNum+=startY+this.nBalls-1-(COL_NUM-1);
@@ -247,7 +237,6 @@ class Player {
       findSix();
     } else //沒有觸發消除時會斷combo
     {
-      bomb = false;
       if (combo > 0) stopCombo();
 
       for (int x=0; x<ROW_NUM; x++) {//死亡判定
@@ -271,26 +260,23 @@ class Player {
 
     bombBall();
     detectHole();//球往上飄
-    comboPlus=false;
+    boolean comboPlus = false; //有爆破引發的子爆破
     for (int i = 0; i < ROW_NUM; i++) {
       for (int j = 0; j < deadlinePos; j++) {//偵測往上飄的所有球
         if (state[i][j]==6) {
-          detectThree(i, j);//偵測是否三個相連(是否觸發消除)
-          if (bomb) {
+          if (checkBomb(i, j)) {//偵測是否三個相連(是否觸發消除)
             colorReadyBomb(i, j);
             comboPlus=true;
           }
         }
       }
     }
-    if (comboPlus==false) {
-      clearSix();
-      bomb=false;
-    }
 
     if (comboPlus) {//有待爆球的情況
       startBomb();
       findSix();
+    } else {
+      clearSix();
     }
   }
   //-----------------BallControls------------
@@ -419,14 +405,13 @@ class Player {
   }
 
 
-  void detectThree(int x, int y) {//偵測往上飄的球是否的觸發引爆
+  boolean checkBomb(int x, int y) {//偵測往上飄的球是否的觸發引爆
     if (grid[x][y]!=0) {
-      bomb=false;
       if (y-1>=0) {
         if (grid[x][y-1]==grid[x][y]) {
           if (y-2>=0) {
             if (grid[x][y-2]==grid[x][y]) {
-              bomb=true;
+              return true;
             }
           }
         }
@@ -435,7 +420,7 @@ class Player {
         if (grid[x][y-1]==grid[x][y]) {
           if (y+1<deadlinePos) {
             if (grid[x][y+1]==grid[x][y]) {
-              bomb=true;
+              return true;
             }
           }
         }
@@ -444,12 +429,13 @@ class Player {
         if (grid[x][y+1]==grid[x][y]) {
           if (y+2<deadlinePos) {
             if (grid[x][y+2]==grid[x][y]) {
-              bomb=true;
+              return true;
             }
           }
         }
       }
     }
+    return false;
   }
 
   void colorReadyBomb(int x, int y) {//觸發周遭相同顏色的球變成5
