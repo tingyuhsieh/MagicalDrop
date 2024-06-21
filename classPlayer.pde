@@ -22,7 +22,7 @@ class Player {
 
   int combo;
   int bombStartTime;
-  boolean endBomb; //爆破結束
+  boolean isBombing; //正在表演爆破的動畫
 
   int attackRows; //被攻擊所要增加的行數
   int rowsWaitingToAdd; //等待加的行數
@@ -51,7 +51,7 @@ class Player {
     bombStartTime = 0;
     isBall=false;
 
-    endBomb=true;
+    isBombing = false;
     combo = 0;
     ballDown = false;
     ballUp = false;
@@ -83,11 +83,11 @@ class Player {
       getButt();
       drawLine();
       ballRun();
-      //-----------------bomb的時間&bomb開始結束判定-------------------
-      if (endBomb==false) {
-        if (millis() - bombStartTime > BOMBING_DURATION) {
-          endBomb=true;
-          if (bombingNum >= 3)bombAndFly();
+      //--------------------------bomb結束判定---------------------------
+      if (isBombing) {
+        if (millis() - bombStartTime > BOMBING_DURATION) { //bomb結束
+          isBombing = false;
+          if (bombingNum >= 3)bombAndFly(); //有待爆球時將球消除並向上填補空位
         }
       }
       //---------------檢查combo計算的有效時間,超過時結束combo------------------
@@ -532,7 +532,7 @@ class Player {
 
   //---------------觸發combo------------------
   void startBomb() {
-    endBomb=false;
+    isBombing = true;
     bombStartTime = millis();
     combo+=1;
     comboSound();
