@@ -93,7 +93,6 @@ class Player {
       if (endBomb==false) {
         if (bombCount==0) {
           bombCount=BOMBING_TIME;
-          onBombBall();
         }
       }
 
@@ -560,6 +559,11 @@ class Player {
     bombStartTime = millis();
     combo+=1;
     comboSound();
+    //每次觸發消除時確認是否要加對手的行數
+    if (opponent == null) return;
+
+    if (combo%2 == 0) 
+      opponent.addRows();
   }
   //---------------結束combo------------------
   void stopCombo() { 
@@ -578,14 +582,6 @@ class Player {
     rowsWaitingToAdd += attackRows;
     attackRows = 0;
   } 
-
-  //------------每次消除球之後確認是否要加對手的行數------------------
-  void onBombBall() {
-    if (opponent == null) return;
-
-    if (combo%2 == 0) 
-      opponent.addRows();
-  }
   //----------------Deadline----------------------
   void drawDeadLine() {
     int flash = 1 ;
