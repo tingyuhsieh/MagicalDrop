@@ -24,7 +24,7 @@ class Player {
   boolean bomb;
   int bombStartTime;
   boolean comboPlus; //有爆破引發的子爆破
-  boolean endBomb, endBombchild; //爆破結束, 子爆破結束
+  boolean endBomb; //爆破結束
   int bombCount;
 
   int attackRows; //被攻擊所要增加的行數
@@ -56,7 +56,6 @@ class Player {
 
     bombCount=0;
     endBomb=true;
-    endBombchild=true;
     comboPlus=false;
     combo = 0;
     bomb=false;
@@ -91,7 +90,7 @@ class Player {
       drawLine();
       ballRun();
       //-----------------bomb的時間&bomb開始結束判定-------------------
-      if (endBomb==false || endBombchild==false) {
+      if (endBomb==false) {
         if (bombCount==0) {
           bombCount=BOMBING_TIME;
           onBombBall();
@@ -103,10 +102,6 @@ class Player {
       } 
       if (bombCount==0) {
         endBomb=true;
-        endBombchild=true;
-      }
-
-      if (endBomb==true&&endBombchild==true) {
         if (comboPlus==true||bomb==true)bombAndFly();
       }
       //---------------檢查combo計算的有效時間,超過時結束combo------------------
@@ -260,8 +255,11 @@ class Player {
         colorReadyBomb(posX, startY+this.nBalls-1);
       }
       findSix();
-      endBomb=false;
-    } else if (endBomb==true) {
+    } else //沒有觸發消除時會斷combo
+    {
+      bomb = false;
+      if (combo > 0) stopCombo();
+
       for (int x=0; x<ROW_NUM; x++) {//死亡判定
         if (grid[x][deadlinePos]!=0&&grid[x][deadlinePos]!=5) {
           if (playerIndex==1) {
@@ -297,14 +295,12 @@ class Player {
     }
     if (comboPlus==false) {
       clearSix();
-      endBombchild=true;
       bomb=false;
     }
 
     if (comboPlus) {//有待爆球的情況
       startBomb();
       findSix();
-      endBombchild=false;
     }
   }
   //-----------------BallControls------------
@@ -560,6 +556,7 @@ class Player {
 
   //---------------觸發combo------------------
   void startBomb() {
+    endBomb=false;
     bombStartTime = millis();
     combo+=1;
     comboSound();
