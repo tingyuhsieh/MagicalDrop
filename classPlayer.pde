@@ -2,7 +2,7 @@ final int RECT_SIZE = 50; //一格的大小 //<>//
 final int ROW_NUM = 7; //行數
 final int COL_NUM = 13; //列數
 final int BOMBING_TIME = 15; //爆破的表演時間
-final int COMBO_VAILD_DURATION = 100; //combo計算的有效期間
+final int COMBO_VAILD_DURATION = 1666; //combo計算的有效期間(毫秒)
 final int ATTACK_ROWS_MAX = 8; //攻擊加行的上限
 
 class Player {
@@ -20,9 +20,9 @@ class Player {
   int buttColor; //底部球的顏色(拿球時使用)
   int butt; //底部空格(不包含5)的位置y(使用於line以及拿球)
 
-  int combo=0;
-  boolean bomb, stopCombo;
-  int comboValidTime;
+  int combo;
+  boolean bomb;
+  int bombStartTime;
   boolean comboPlus; //有爆破引發的子爆破
   boolean endBomb, endBombchild; //爆破結束, 子爆破結束
   int bombCount;
@@ -51,17 +51,17 @@ class Player {
     startY=0;
     nBalls = 0;
     ballY = 0;
-    comboValidTime = COMBO_VAILD_DURATION;
+    bombStartTime = 0;
     isBall=false;
 
     bombCount=0;
     endBomb=true;
     endBombchild=true;
     comboPlus=false;
+    combo = 0;
     bomb=false;
     ballDown = false;
     ballUp = false;
-    stopCombo = true;
     attackRows = 0;
     rowsWaitingToAdd = 0;
 
@@ -109,17 +109,9 @@ class Player {
       if (endBomb==true&&endBombchild==true) {
         if (comboPlus==true||bomb==true)bombAndFly();
       }
-      //---------------combo計算的有效時間,combo時播聲音一次--------------------
-      if (!stopCombo) {
-        if (comboValidTime==0) {
-          stopCombo = true;
-          combo=0;
-          onComboEnd();
-        } else if (comboValidTime>0) {
-          comboValidTime--;
-        }
-      } else {
-        combo=0;
+      //---------------檢查combo計算的有效時間,超過時結束combo------------------
+      if (combo > 0 && millis() - bombStartTime > COMBO_VAILD_DURATION) {
+        stopCombo();
       }
       //------------------------畫出上面的球---------------
       for (int i = 0; i < ROW_NUM; i++) {
@@ -249,9 +241,16 @@ class Player {
       grid[posX][i]=gotColor;
     } 
 
-    detectThree();//偵測是否三個相連(是否觸發消除)
+    if (checkBomb())//偵測是否三個相連(是否觸發消除)
+    {
+      bomb = true;
+    } else //沒有觸發消除時會斷combo
+    {
+      bomb = false;
+      if (combo > 0) stopCombo();
+    }
     if (bomb) {//有待爆球的情況
-      combo();
+      startBomb();
       if (startY+this.nBalls-1>COL_NUM-1)
       {
         bombingNum+=startY+this.nBalls-1-(COL_NUM-1);
@@ -303,7 +302,7 @@ class Player {
     }
 
     if (comboPlus) {//有待爆球的情況
-      combo();
+      startBomb();
       findSix();
       endBombchild=false;
     }
@@ -409,28 +408,28 @@ class Player {
     }
   }
 
-  void detectThree() {//偵測往上丟的球是否觸發引爆,且沒有引爆時會斷combo
-    bomb=false;
-    stopCombo = true;
+  boolean checkBomb() {//偵測往上丟的球是否觸發引爆
+
     if (nBalls>=3) {
-      bomb=true;
-      stopCombo = false;
-      return;
-    } else if (nBalls==2) {
+      return true;
+    } 
+
+    if (nBalls==2) {
       if (startY>0) {
         if (grid[posX][startY-1]==grid[posX][startY]) {
-          bomb=true;
-          stopCombo = false;
-          return;
+          return true;
         }
       }
-    } else if (startY-1>0) {
+    } 
+
+    if (startY-1>0) {
       if (grid[posX][startY-2]==grid[posX][startY-1]&&grid[posX][startY-1]==grid[posX][startY]) {
-        bomb=true;
-        stopCombo = false;
-        return;
+        return true;
       }
     }
+
+    //未觸發引爆
+    return false;
   }
 
 
@@ -560,11 +559,17 @@ class Player {
   }
 
   //---------------觸發combo------------------
-  void combo() {
-    stopCombo=false; //<>//
+  void startBomb() {
+    bombStartTime = millis();
     combo+=1;
-    comboValidTime = COMBO_VAILD_DURATION;
-    comboSound(); //<>//
+    comboSound();
+  }
+  //---------------結束combo------------------
+  void stopCombo() { 
+    combo = 0;
+    if (opponent == null) return;
+
+    opponent.attacked(); //combo結束後攻擊對手
   }
   //---------------攻擊加行-------------------
   void addRows() {
@@ -572,23 +577,17 @@ class Player {
   }
 
   //---------------受到攻擊--------------------
-  void attacked() { //<>//
+  void attacked() {
     rowsWaitingToAdd += attackRows;
     attackRows = 0;
-  } //<>//
+  } 
 
-  //---------------攻擊對手--------------------
-  void onBombBall() { //每次消除球之後確認是否要加對手的行數
+  //------------每次消除球之後確認是否要加對手的行數------------------
+  void onBombBall() {
     if (opponent == null) return;
 
     if (combo%2 == 0) 
       opponent.addRows();
-  }
-
-  void onComboEnd() { //combo結束後攻擊對手
-    if (opponent == null) return;
-
-    opponent.attacked();
   }
   //----------------Deadline----------------------
   void drawDeadLine() {
