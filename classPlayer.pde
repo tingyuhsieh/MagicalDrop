@@ -1,7 +1,7 @@
 final int RECT_SIZE = 50; //一格的大小 //<>//
 final int ROW_NUM = 7; //行數
 final int COL_NUM = 13; //列數
-final int BOMBING_TIME = 15; //爆破的表演時間
+final int BOMBING_DURATION = 250; //爆破的表演時間(毫秒)
 final int COMBO_VAILD_DURATION = 1666; //combo計算的有效期間(毫秒)
 final int ATTACK_ROWS_MAX = 8; //攻擊加行的上限
 
@@ -25,7 +25,6 @@ class Player {
   int bombStartTime;
   boolean comboPlus; //有爆破引發的子爆破
   boolean endBomb; //爆破結束
-  int bombCount;
 
   int attackRows; //被攻擊所要增加的行數
   int rowsWaitingToAdd; //等待加的行數
@@ -54,7 +53,6 @@ class Player {
     bombStartTime = 0;
     isBall=false;
 
-    bombCount=0;
     endBomb=true;
     comboPlus=false;
     combo = 0;
@@ -91,17 +89,10 @@ class Player {
       ballRun();
       //-----------------bomb的時間&bomb開始結束判定-------------------
       if (endBomb==false) {
-        if (bombCount==0) {
-          bombCount=BOMBING_TIME;
+        if (millis() - bombStartTime > BOMBING_DURATION) {
+          endBomb=true;
+          if (comboPlus==true||bomb==true)bombAndFly();
         }
-      }
-
-      if (bombCount>0) {
-        bombCount-=1;
-      } 
-      if (bombCount==0) {
-        endBomb=true;
-        if (comboPlus==true||bomb==true)bombAndFly();
       }
       //---------------檢查combo計算的有效時間,超過時結束combo------------------
       if (combo > 0 && millis() - bombStartTime > COMBO_VAILD_DURATION) {
