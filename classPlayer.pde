@@ -5,6 +5,12 @@ final int BOMBING_DURATION = 250; //爆破的表演時間(毫秒)
 final int COMBO_VAILD_DURATION = 1666; //combo計算的有效期間(毫秒)
 final int ATTACK_ROWS_MAX = 8; //攻擊加行的上限
 
+enum GameResult {
+  DEUCE, //平手
+    WIN, //勝者
+    LOSE //敗者
+}
+
 class Player {
 
   int [][] grid; //儲存球的類型資訊 0:空格, 1:紅, 2:黃, 3:綠, 4:藍, 5:爆破中
@@ -36,6 +42,9 @@ class Player {
   int bombingNum; //爆破中的數量
 
   Player opponent; //攻擊的玩家
+
+  PlayerStatus status;
+  GameResult gameResult; //遊戲結果
 
   SoundFile[] soundCombo;
 
@@ -74,6 +83,9 @@ class Player {
         state[i][j] = 0;
       }
     }
+
+    status = PlayerStatus.ACTIVE;
+    gameResult = GameResult.DEUCE;
   }
 
   void setOpponentPlayer(Player opponent) {
@@ -82,7 +94,7 @@ class Player {
 
   void drawPlayer(PImage imgPlayer) {
     image(imgPlayer, 0, 0);
-    if (mode == 1) {
+    if (gameState == GameState.GAMING) {
       getButt();
       drawLine();
       ballRun();
@@ -162,19 +174,16 @@ class Player {
       }
       //----------------------------死線--------------------------------
       drawDeadLine();
-      //--------------------------先消完目標數量的勝利----------------------
-      if (bombTargetNum<=0) { 
-        if (playerIndex==1) {
-          println("player1 achieved the goal first!");
-          println("player1 Win!");
-          mode =211;
-        } else if (playerIndex==2) {
-          println("player2 achieved the goal first!");
-          println("player2 Win!");
-          mode = 212;
-        }
-
-        //exit();
+    } else if (gameState == GameState.GAME_OVER) {
+      switch(gameResult) {
+      case WIN:
+        image(imgWin, 0, 450);
+        break;
+      case LOSE:
+        image(imgLose, 0, 450);
+        break;
+      default:
+        break;
       }
     }
   }
@@ -244,16 +253,8 @@ class Player {
 
       for (int x=0; x<ROW_NUM; x++) {//死亡判定
         if (grid[x][deadlinePos]!=0&&grid[x][deadlinePos]!=5) {
-          if (playerIndex==1) {
-            println("player1 Suicide");
-            println("player2 Win!");
-            mode = 222;
-          } else if (playerIndex==2) {
-            println("player2 Suicide");
-            println("player1 Win!");
-            mode = 221;
-          }
-          //exit();
+          status = PlayerStatus.DEAD_BY_MISPLAY;
+          break;
         }
       }
     }
@@ -520,15 +521,8 @@ class Player {
     }
     for (int x=0; x<ROW_NUM; x++) {//死亡判定
       if (grid[x][deadlinePos]!=0&&grid[x][deadlinePos]!=5) {
-        println("!!K.O!!");
-        if (playerIndex==1) {
-          println("player2 Win!");
-          mode = 232;
-        } else if (playerIndex==2) {
-          println("player1 Win!");
-          mode = 231;
-        }
-        //exit();
+        status = PlayerStatus.KNOCKED_OUT;
+        break;
       }
     }
   }
@@ -599,6 +593,10 @@ class Player {
           point((posX+0.5)*RECT_SIZE, i*RECT_SIZE-j+v);
         }
     }
+  }
+  //-------------------是否達成目標----------------------
+  boolean checkGoal() {
+    return bombTargetNum <= 0;
   }
   //----------------------sound----------------------
   void comboSound() {

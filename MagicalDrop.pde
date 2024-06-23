@@ -10,18 +10,25 @@ PImage[] imgNum = new PImage[10];
 Player player1, player2;
 Runtime runtime;
 
-int mode; 
-// 0: 等待開始, 1: 遊戲中
-// 211:玩家1勝利(先消除完目標數量), 212:玩家2勝利(先消除完目標數量)
-// 221:玩家1勝利(對手自殺), 222:玩家2勝利(對手自殺)
-// 231:玩家1勝利(K.O.對手), 232:玩家2勝利(K.O.對手)
+enum PlayerStatus {
+  ACTIVE, // 玩家仍在遊戲中
+    DEAD_BY_MISPLAY, // 由於失誤導致的死亡
+    KNOCKED_OUT      // 被K.O.
+}
 
+enum GameState {
+  PREPARED, //等待開始
+    GAMING, //遊戲中
+    GAME_OVER //遊戲結束
+}
+
+GameState gameState;
 
 void setup() {
   size(900, 650);
   runtime=java.lang.Runtime.getRuntime();
 
-  mode = 0;
+  gameState = GameState.PREPARED;
 
   imgRedBall = loadImage("redBall.png");
   imgYellowBall = loadImage("yellowBall.png");
@@ -66,59 +73,122 @@ void draw() {
   player1.drawPlayer(imgGoddess);
   translate(width-350, 0);
   player2.drawPlayer(imgDevil);
-  if (mode == 1) {
-    // drawCombo
-    drawCombo(player1.combo, -240, 580);
-    drawCombo(player2.combo, 310, 580);
-  }
 
   // drawPoint
   drawPoint(player1.bombTargetNum, -113, 329);
   drawPoint(player2.bombTargetNum, -47, 412);
 
-  noTint();
-  if (mode == 211 || mode == 221 || mode == 231) {
-    image(imgLose, 0, 450);
-    image(imgWin, -550, 450);
-  } else if (mode == 212 || mode == 222 || mode == 232) {
-    image(imgLose, -550, 450);
-    image(imgWin, 0, 450);
+  if (gameState == GameState.GAMING) {
+    // drawCombo
+    drawCombo(player1.combo, -240, 580);
+    drawCombo(player2.combo, 310, 580);
+
+    if (checkGameOver())
+      gameState = GameState.GAME_OVER;
   }
 }
 
 void keyPressed() {
 
-  if (mode == 1) {
+  if (gameState == GameState.GAMING) {
     player1.keyPressed(java.awt.event.KeyEvent.VK_A, java.awt.event.KeyEvent.VK_D, 
       java.awt.event.KeyEvent.VK_W, java.awt.event.KeyEvent.VK_S);
     player2.keyPressed(LEFT, RIGHT, UP, DOWN);
-  } else if (mode == 0) {
-    if (key == '0') mode = 1;
+  } else if (gameState == GameState.PREPARED) {
+    if (key == '0') gameState = GameState.GAMING;
   }
 }
 
-  void drawCombo(int combo, float posX, float posY) {
-    if (combo>0)drawNum(combo, 2, posX, posY);
+void drawCombo(int combo, float posX, float posY) {
+  if (combo>0)drawNum(combo, 2, posX, posY);
+}
+
+void drawPoint(int point, float posX, float posY) {
+  drawNum(point, 3, posX, posY);
+}
+
+void drawNum(int number, int digits, float posX, float posY) {
+  int imgWidth = 40;
+  int imgHeight = 60;
+
+  pushMatrix();
+  tint(255, 200);
+  scale(1, 1);
+  translate(posX, posY);
+  for (int i = 0; i < digits; i++) {
+    image(imgNum[floor(number/pow(10, i))%10], -imgWidth*i, 0, imgWidth, imgHeight);
   }
+  popMatrix();
+}
 
-  void drawPoint(int point, float posX, float posY) {
-    drawNum(point, 3, posX, posY);
-  }
+boolean checkGameOver() {
 
-  void drawNum(int number, int digits, float posX, float posY) {
-    int imgWidth = 40;
-    int imgHeight = 60;
-
-    pushMatrix();
-    tint(255, 200);
-    scale(1, 1);
-    translate(posX, posY);
-    for (int i = 0; i < digits; i++) {
-      image(imgNum[floor(number/pow(10, i))%10], -imgWidth*i, 0, imgWidth, imgHeight);
+  // Check if either player is dead
+  if (player1.status != PlayerStatus.ACTIVE || player2.status != PlayerStatus.ACTIVE)
+  {
+    if (player1.status != PlayerStatus.ACTIVE && player2.status != PlayerStatus.ACTIVE)
+    {
+      setDeuceResult();
+      printPlayerLoseDetail(player1);
+      printPlayerLoseDetail(player2);
+      println("Deuce");
+    } else
+    {
+      Player winner = player1.status == PlayerStatus.ACTIVE ? player1 : player2;
+      Player loser = (winner == player1) ? player2 : player1;
+      setWinLoseResult(winner, loser);
+      printPlayerLoseDetail(loser);
+      println("player" + winner.playerIndex + " Win!");
     }
-    popMatrix();
+
+    return true;
   }
-  
+
+  // Check if either player achieved the goal
+  if (player1.checkGoal() || player2.checkGoal())
+  {
+    if (player1.checkGoal() && player2.checkGoal())
+    {
+      setDeuceResult();
+      println("players achieved goal at same time!");
+      println("Deuce");
+    } else
+    {
+      Player winner = player1.checkGoal() ? player1 : player2;
+      Player loser = (winner == player1) ? player2 : player1;
+      setWinLoseResult(winner, loser);
+      println("player" + winner.playerIndex + " achieved the goal first!");
+      println("player" + winner.playerIndex + " Win!");
+    }
+    return true;
+  }
+
+  return false;
+}
+
+void setDeuceResult() {
+  player1.gameResult = player2.gameResult = GameResult.DEUCE;
+}
+
+void setWinLoseResult(Player winner, Player loser) {
+  winner.gameResult = GameResult.WIN;
+  loser.gameResult = GameResult.LOSE;
+}
+
+void printPlayerLoseDetail(Player player) {
+  switch(player.status) //<>//
+  {
+  case DEAD_BY_MISPLAY:
+    println("player" + player.playerIndex + " is dead by misplay");
+    break;
+  case KNOCKED_OUT:
+    println("player" + player.playerIndex + " is knocked out");
+    break;
+  default:
+    break;
+  }
+}
+
 void garbageCollector() {
   runtime.gc();
 }
