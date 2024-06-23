@@ -609,6 +609,6 @@ class Player {
       soundCombo[i].stop();
       if (combo == i+1) soundCombo[i].play();
     }
-    if (combo > soundCombo.length) soundComboL[soundCombo.length - 1].play();
+    if (combo > soundCombo.length) soundCombo[soundCombo.length - 1].play();
   }
 }

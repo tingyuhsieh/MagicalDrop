@@ -1,6 +1,4 @@
 import processing.sound.*;
-SoundFile[] soundComboR = new SoundFile[9];
-SoundFile[] soundComboL = new SoundFile[9];
 SoundFile soundAddBalls, soundBallDown, soundBallUp, soundBgm;
 
 PImage imgRedBall, imgYellowBall, imgGreenBall, imgBlueBall, imgEmpty;
@@ -37,9 +35,9 @@ void setup() {
     imgNum[i] = loadImage(i + ".png");
   }
 
+  SoundFile[] soundCombo = new SoundFile[9];
   for (int i = 0; i < 9; i++) {
-    soundComboR[i] = new SoundFile(this, "combo" + (i+1) + ".mp3");
-    soundComboL[i] = new SoundFile(this, "combo" + (i+1) + ".mp3");
+    soundCombo[i] = new SoundFile(this, "combo" + (i+1) + ".mp3");
   }
 
   soundAddBalls = new SoundFile(this, "addBalls.mp3");
@@ -51,8 +49,8 @@ void setup() {
   imgGoddess=loadImage("goddess.png");
   imgDevil=loadImage("devil.png");
   
-  player1 = new Player(1, 12, 300, soundComboL);
-  player2 = new Player(2, 12, 300, soundComboR);
+  player1 = new Player(1, 12, 300, soundCombo);
+  player2 = new Player(2, 12, 300, soundCombo);
   player1.setOpponentPlayer(player2);
   player2.setOpponentPlayer(player1);
 }
