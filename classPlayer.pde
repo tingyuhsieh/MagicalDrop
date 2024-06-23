@@ -3,7 +3,7 @@ final int ROW_NUM = 7; //行數
 final int COL_NUM = 13; //列數
 final int BOMBING_DURATION = 250; //爆破的表演時間(毫秒)
 final int COMBO_VAILD_DURATION = 1666; //combo計算的有效期間(毫秒)
-final int ATTACK_ROWS_MAX = 8; //攻擊加行的上限
+final int QUICK_ATTACK_COMBO_THRESHOLD = 9; //高速攻擊的combo臨界值
 
 enum GameResult {
   DEUCE, //平手
@@ -30,7 +30,6 @@ class Player {
   int bombStartTime;
   boolean isBombing; //正在表演爆破的動畫
 
-  int attackRows; //被攻擊所要增加的行數
   int rowsWaitingToAdd; //等待加的行數
 
   boolean ballDown, ballUp; //丟球拿球動畫的判斷
@@ -67,7 +66,6 @@ class Player {
     combo = 0;
     ballDown = false;
     ballUp = false;
-    attackRows = 0;
     rowsWaitingToAdd = 0;
 
 
@@ -533,28 +531,29 @@ class Player {
     bombStartTime = millis();
     combo+=1;
     comboSound();
-    //每次觸發消除時確認是否要加對手的行數
-    if (opponent == null) return;
 
-    if (combo%2 == 0) 
-      opponent.addRows();
+    checkQuickAttackOpponent(); //每次觸發消除時確認是否要攻擊對手
   }
   //---------------結束combo------------------
   void stopCombo() { 
+    if (combo < QUICK_ATTACK_COMBO_THRESHOLD) //combo結束後若沒有攻擊過才攻擊對手
+      opponent.attacked(combo/2);
+
     combo = 0;
+  }
+  //---------------攻擊對手-------------------
+  void checkQuickAttackOpponent() {
     if (opponent == null) return;
 
-    opponent.attacked(); //combo結束後攻擊對手
-  }
-  //---------------攻擊加行-------------------
-  void addRows() {
-    if (attackRows < ATTACK_ROWS_MAX) attackRows++;
+    if (combo == QUICK_ATTACK_COMBO_THRESHOLD) {
+      opponent.attacked(combo/2);  //開啟高速攻擊模式會直接攻擊累積的行數
+    } else if (combo > QUICK_ATTACK_COMBO_THRESHOLD)
+      opponent.attacked(1); //高速攻擊模式時每次combo都攻擊1行
   }
 
   //---------------受到攻擊--------------------
-  void attacked() {
+  void attacked(int attackRows) {
     rowsWaitingToAdd += attackRows;
-    attackRows = 0;
   } 
   //----------------Deadline----------------------
   void drawDeadLine() {
