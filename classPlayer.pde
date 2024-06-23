@@ -37,7 +37,7 @@ class Player {
   int startY; //底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
   int ballX, ballY; //丟球拿球動畫的位置
 
-  int playerIndex;
+  String playerName;
   int bombTargetNum; //結束遊戲所需消去的目標數量
   int bombingNum; //爆破中的數量
 
@@ -48,9 +48,9 @@ class Player {
 
   SoundFile[] soundCombo;
 
-  Player(int playerIndex, int deadlinePos, int bombTargetNum, SoundFile[] soundCombo) {
+  Player(String playerName, int deadlinePos, int bombTargetNum, SoundFile[] soundCombo) {
 
-    this.playerIndex = playerIndex;
+    this.playerName = playerName;
     this.deadlinePos = deadlinePos >= COL_NUM ? (COL_NUM - 1) : deadlinePos;
     this.bombTargetNum = bombTargetNum;
     this.soundCombo = soundCombo;

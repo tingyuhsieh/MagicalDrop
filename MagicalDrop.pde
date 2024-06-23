@@ -55,9 +55,9 @@ void setup() {
 
   imgGoddess=loadImage("goddess.png");
   imgDevil=loadImage("devil.png");
-  
-  player1 = new Player(1, 12, 300, soundCombo);
-  player2 = new Player(2, 12, 300, soundCombo);
+
+  player1 = new Player("player1", 12, 300, soundCombo);
+  player2 = new Player("player2", 12, 300, soundCombo);
   player1.setOpponentPlayer(player2);
   player2.setOpponentPlayer(player1);
 }
@@ -138,7 +138,7 @@ boolean checkGameOver() {
       Player loser = (winner == player1) ? player2 : player1;
       setWinLoseResult(winner, loser);
       printPlayerLoseDetail(loser);
-      println("player" + winner.playerIndex + " Win!");
+      println(winner.playerName + " Win!");
     }
 
     return true;
@@ -157,14 +157,14 @@ boolean checkGameOver() {
       Player winner = player1.checkGoal() ? player1 : player2;
       Player loser = (winner == player1) ? player2 : player1;
       setWinLoseResult(winner, loser);
-      println("player" + winner.playerIndex + " achieved the goal first!");
-      println("player" + winner.playerIndex + " Win!");
+      println(winner.playerName + " achieved the goal first!");
+      println(winner.playerName + " Win!");
     }
     return true;
   }
 
   return false;
-}
+} //<>//
 
 void setDeuceResult() {
   player1.gameResult = player2.gameResult = GameResult.DEUCE;
@@ -176,13 +176,13 @@ void setWinLoseResult(Player winner, Player loser) {
 }
 
 void printPlayerLoseDetail(Player player) {
-  switch(player.status) //<>//
+  switch(player.status)
   {
   case DEAD_BY_MISPLAY:
-    println("player" + player.playerIndex + " is dead by misplay");
+    println(player.playerName + " is dead by misplay");
     break;
   case KNOCKED_OUT:
-    println("player" + player.playerIndex + " is knocked out");
+    println(player.playerName + " is knocked out");
     break;
   default:
     break;
