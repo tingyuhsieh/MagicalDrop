@@ -22,10 +22,6 @@ int mode;
 void setup() {
   size(900, 650);
   runtime=java.lang.Runtime.getRuntime();
-  player1=new Player(1, 12, 300);
-  player2=new Player(2, 12, 300);
-  player1.setOpponentPlayer(player2);
-  player2.setOpponentPlayer(player1);
 
   mode = 0;
 
@@ -54,6 +50,11 @@ void setup() {
 
   imgGoddess=loadImage("goddess.png");
   imgDevil=loadImage("devil.png");
+  
+  player1 = new Player(1, 12, 300, soundComboL);
+  player2 = new Player(2, 12, 300, soundComboR);
+  player1.setOpponentPlayer(player2);
+  player2.setOpponentPlayer(player1);
 }
 
 void draw() {

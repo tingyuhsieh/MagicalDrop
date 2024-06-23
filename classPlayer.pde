@@ -37,11 +37,14 @@ class Player {
 
   Player opponent; //攻擊的玩家
 
-  Player(int playerIndex, int deadlinePos, int bombTargetNum) {
+  SoundFile[] soundCombo;
+
+  Player(int playerIndex, int deadlinePos, int bombTargetNum, SoundFile[] soundCombo) {
 
     this.playerIndex = playerIndex;
     this.deadlinePos = deadlinePos >= COL_NUM ? (COL_NUM - 1) : deadlinePos;
     this.bombTargetNum = bombTargetNum;
+    this.soundCombo = soundCombo;
 
     posX = ROW_NUM/2;
     posY = COL_NUM-1;
@@ -599,19 +602,13 @@ class Player {
   }
   //----------------------sound----------------------
   void comboSound() {
-    if (playerIndex==1) {
-      for (int i = 0; i < 9; i++) {
-        soundComboL[i].stop();
-        if (combo == i+1) soundComboL[i].play();
-      }
-      if (combo > 9) soundComboL[8].play();
+    if (soundCombo == null || soundCombo.length == 0)
+      return;
+
+    for (int i = 0; i < soundCombo.length; i++) {
+      soundCombo[i].stop();
+      if (combo == i+1) soundCombo[i].play();
     }
-    if (playerIndex==2) {
-      for (int i = 0; i < 9; i++) {
-        soundComboR[i].stop();
-        if (combo == i+1) soundComboR[i].play();
-      }
-      if (combo > 9) soundComboR[8].play();
-    }
+    if (combo > soundCombo.length) soundComboL[soundCombo.length - 1].play();
   }
 }
