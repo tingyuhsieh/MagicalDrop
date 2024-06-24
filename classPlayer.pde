@@ -24,7 +24,6 @@ class Player {
   int nBalls; //玩家持有的球數
   boolean isBall; //底部是否有球
   color c; //玩家球的顏色
-  int bombTarget; //觸發消除的顏色
   int gotColor; //玩家持有球的顏色
   int buttColor; //底部球的顏色(拿球時使用)
   int butt; //底部空格(不包含5)的位置y(使用於line以及拿球)
@@ -429,26 +428,24 @@ class Player {
   }
 
   void colorReadyBomb(int x, int y) {//觸發周遭相同顏色的球變成5
-
-    bombTarget=grid[x][y];
-    subBomb(x, y);
+    subBomb(grid[x][y], x, y);
   }
 
-  void subBomb(int x, int y) {//
+  void subBomb(int ballColor, int x, int y) {
     state[x][y]=5;
     grid[x][y]=5;
     bombingNum+=1;
     if (x>0) {
-      if (grid[x-1][y]==bombTarget)subBomb(x-1, y);
+      if (grid[x-1][y]==ballColor)subBomb(ballColor, x-1, y);
     }
     if (x<ROW_NUM-1) {
-      if (grid[x+1][y]==bombTarget)subBomb(x+1, y);
+      if (grid[x+1][y]==ballColor)subBomb(ballColor, x+1, y);
     }
     if (y>0) {
-      if (grid[x][y-1]==bombTarget)subBomb(x, y-1);
+      if (grid[x][y-1]==ballColor)subBomb(ballColor, x, y-1);
     }
     if (y<COL_NUM-1) {
-      if (grid[x][y+1]==bombTarget)subBomb(x, y+1);
+      if (grid[x][y+1]==ballColor)subBomb(ballColor, x, y+1);
     }
   }
   void findSix() { //將正在爆破的球下方的球設為6=>等待往上飄的球
