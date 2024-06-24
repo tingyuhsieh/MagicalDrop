@@ -1,9 +1,12 @@
 final int RECT_SIZE = 50; //一格的大小 //<>//
 final int ROW_NUM = 7; //行數
 final int COL_NUM = 13; //列數
+final int BALL_COL_NUM_INIT = 5; //遊戲開始時的球池列數
 final int BOMBING_DURATION = 250; //爆破的表演時間(毫秒)
 final int COMBO_VAILD_DURATION = 1666; //combo計算的有效期間(毫秒)
 final int QUICK_ATTACK_COMBO_THRESHOLD = 9; //高速攻擊的combo臨界值
+final int ADD_BALL_INTERVAL = 333; //加球的間隔時間(毫秒)
+final int AUTO_ADD_BALL_THRESHOLD = 8000; //自動加球的時間臨界值(毫秒)，0則關閉該功能
 
 enum GameResult {
   DEUCE, //平手
@@ -30,6 +33,7 @@ class Player {
   int bombStartTime;
   boolean isBombing; //正在表演爆破的動畫
 
+  int lastAddBallTime;
   int rowsWaitingToAdd; //等待加的行數
 
   boolean ballDown, ballUp; //丟球拿球動畫的判斷
@@ -66,6 +70,7 @@ class Player {
     combo = 0;
     ballDown = false;
     ballUp = false;
+    lastAddBallTime = 0;
     rowsWaitingToAdd = 0;
 
 
@@ -134,23 +139,6 @@ class Player {
           //}
         }
       }
-      //--------------數空格 空格太多增加球-----------------
-
-      int noBall = 0;
-      if (frameCount % 20 == 0) {
-        for (int i = 0; i < ROW_NUM; i++) {
-          for (int j = 0; j < 12; j++) {
-            if (grid[i][j] == 0) noBall++;
-          }
-        }
-        if (noBall >= 56) rowsWaitingToAdd++;
-      }
-
-      //------------------自動加球-----------------
-      if (frameCount % 480 == 460) {
-        //rowsWaitingToAdd++;
-      }
-
       //-------------檢查是否需加球------------------
       checkAddBalls();
       //--------------------------------玩家球的顏色------------------------
@@ -496,21 +484,44 @@ class Player {
     }
   }
 
-  //-----------------------增加球-------------------------
+  //-----------------------增加球-------------------------  
   void checkAddBalls() {
+
+    // 維持最低球數
+    if (rowsWaitingToAdd == 0) {
+      int ballNum = 0;
+      for (int i = 0; i < ROW_NUM; i++) {
+        for (int j = 0; j < deadlinePos; j++) {
+          if (grid[i][j] != 0) ballNum++;
+        }
+      }
+      if (ballNum + nBalls < (ROW_NUM * BALL_COL_NUM_INIT)) {      
+        rowsWaitingToAdd++; //<>//
+      }
+    }
+
+    // 超過一定時間自動加球
+    if (rowsWaitingToAdd == 0) {
+      if (AUTO_ADD_BALL_THRESHOLD > 0 && millis() - lastAddBallTime > AUTO_ADD_BALL_THRESHOLD ) {
+        rowsWaitingToAdd++;
+      }
+    }
+
+    // 加球判斷
     if (rowsWaitingToAdd > 0) {
-      if (frameCount%20 == 0) {
+      if (millis() - lastAddBallTime > ADD_BALL_INTERVAL) {
         addBalls();
       }
     }
   }
 
   void addBalls() {
+    lastAddBallTime = millis();
     rowsWaitingToAdd--;
     soundAddBalls.stop();
     soundAddBalls.play();
     for (int i = 0; i < ROW_NUM; i++) {
-      for (int j = COL_NUM-2; j >= 0; j--) { //<>//
+      for (int j = COL_NUM-2; j >= 0; j--) {
         grid[i][j+1] = grid[i][j];
         state[i][j+1]=state[i][j];
       }
