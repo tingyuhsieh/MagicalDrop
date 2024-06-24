@@ -23,7 +23,7 @@ class Player {
   int posX, posY; //玩家的位置
   int nBalls; //玩家持有的球數
   boolean isBall; //底部是否有球
-  color c; //玩家球的顏色
+  color refLineColor; //參考線的顏色
   int gotColor; //玩家持有球的顏色
   int buttColor; //底部球的顏色(拿球時使用)
   int butt; //底部空格(不包含5)的位置y(使用於line以及拿球)
@@ -98,7 +98,7 @@ class Player {
     image(imgPlayer, 0, 0);
     if (gameState == GameState.GAMING) {
       getButt();
-      drawLine();
+      drawRefLine();
       ballRun();
       //--------------------------bomb結束判定---------------------------
       if (isBombing) {
@@ -142,19 +142,19 @@ class Player {
       checkAddBalls();
       //--------------------------------玩家球的顏色------------------------
       if (gotColor == 0) {
-        c = color(255, 255, 255);
+        refLineColor = color(255, 255, 255);
         image(imgEmpty, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 1) {
-        c = color(255, 0, 0);
+        refLineColor = color(255, 0, 0);
         image(imgRedBall, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 2) {
-        c = color(255, 255, 0);
+        refLineColor = color(255, 255, 0);
         image(imgYellowBall, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 3) {
-        c = color(0, 255, 0);
+        refLineColor = color(0, 255, 0);
         image(imgGreenBall, posX*RECT_SIZE, posY*RECT_SIZE);
       } else if (gotColor == 4) {
-        c = color(0, 0, 255);
+        refLineColor = color(0, 0, 255);
         image(imgBlueBall, posX*RECT_SIZE, posY*RECT_SIZE);
       }
       //----------------------------死線--------------------------------
@@ -586,17 +586,17 @@ class Player {
     line(0 * RECT_SIZE, deadlinePos * RECT_SIZE, ROW_NUM * RECT_SIZE, deadlinePos * RECT_SIZE);
     popMatrix();
   }
-  //----------------line----------------------
-  void drawLine() {
+  //----------------refLine----------------------
+  void drawRefLine() {
     strokeWeight(3);
     int v =frameCount%10;
     for (int i = posY; i > butt; i--) {
       for (int j = 0; j < 50; j+=10)
         if (nBalls > 0) {
-          stroke(c);
+          stroke(refLineColor);
           point((posX+0.5)*RECT_SIZE, i*RECT_SIZE-j-v);
         } else {
-          stroke(c);
+          stroke(refLineColor);
           point((posX+0.5)*RECT_SIZE, i*RECT_SIZE-j+v);
         }
     }
