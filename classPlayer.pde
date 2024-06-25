@@ -22,10 +22,8 @@ class Player {
   int deadlinePos; //出局的界線，在該位置或超出界線的球則玩家被判出局
   int posX, posY; //玩家的位置
   int nBalls; //玩家持有的球數
-  boolean isBall; //底部是否有球
   color refLineColor; //參考線的顏色
   int gotColor; //玩家持有球的顏色
-  int buttColor; //底部球的顏色(拿球時使用)
   int butt; //底部空格(不包含5)的位置y(使用於line以及拿球)
 
   int combo;
@@ -63,7 +61,6 @@ class Player {
     nBalls = 0;
     ballY = 0;
     bombStartTime = 0;
-    isBall=false;
 
     isBombing = false;
     combo = 0;
@@ -189,21 +186,17 @@ class Player {
         throwAndWait(nBalls);
         findStartY();//更新starty讓動畫正確
         ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
-      } else ballUp=false;
+      }
     } else if (keyCode == downKeyCode) {
       soundBallUp.stop();
       findStartY();
-      buttHasBall();//偵測底部的球是不是可以拿的球
-      if (isBall) {//是可以拿的球才判斷是不是可以拿的顏色
-        getButtColor(); 
-        if (nBalls == 0) {//手上沒球
-          takeBalls();
-        } else {//手上有球,顏色相同才拿
-          if (gotColor==buttColor) {
-            takeBalls();
-          } else ballDown=false;
+
+      if (butt-1>=0) { //檢查底部的球是不是可以拿的球
+        int buttColor = grid[posX][butt-1];
+        if (gotColor ==0 || gotColor==buttColor) { //是可以拿的球才判斷是不是可以拿的顏色
+          takeBalls(buttColor);
         }
-      } else ballDown=false;
+      }
     }
   }
 
@@ -266,18 +259,6 @@ class Player {
     }
   }
   //-----------------BallControls------------
-
-  void getButtColor() {//獲得底部球的顏色(拿球時使用)
-    buttColor = grid[posX][butt-1];
-    if (!isBall)buttColor=0;
-  }
-  void buttHasBall() {//判斷底部是不是可拿的球(拿球時使用)
-    if (butt-1>=0) {//butt-1:不是0也不是5的位置上方 
-      isBall=true;
-    } else {
-      isBall=false;
-    }
-  }
   void getButt() {//不斷更新底部空格(不包含5)的位置(使用於line以及拿球)
     for (int j = ROW_NUM-2; j >= 0; j--) {
       if (grid[posX][j] != 0&&grid[posX][j] != 5) {
@@ -288,7 +269,7 @@ class Player {
       }
     }
   }
-  void takeBalls() {
+  void takeBalls(int buttColor) {
     soundBallDown.stop();
     soundBallDown.play();
     ballDown = true;
