@@ -34,7 +34,7 @@ class Player {
   int rowsWaitingToAdd; //等待加的行數
 
   boolean ballDown, ballUp; //丟球拿球動畫的判斷
-  int ballX, ballY; //丟球拿球動畫的位置
+  int ballAnimX, ballAnimY; //丟球拿球動畫的位置
 
   String playerName;
   int bombTargetNum; //結束遊戲所需消去的目標數量
@@ -58,7 +58,7 @@ class Player {
     posY = ROW_NUM-1;
     butt=0;
     nBalls = 0;
-    ballY = 0;
+    ballAnimY = 0;
     bombStartTime = 0;
 
     isBombing = false;
@@ -197,7 +197,7 @@ class Player {
 
       if (nBalls > 0) {//如果手上有球就丟
         throwAndWait(nBalls);
-        ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
+        ballAnimX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
       }
     } else if (keyCode == downKeyCode) {
       soundBallUp.stop();
@@ -286,7 +286,7 @@ class Player {
     ballUp = false;
 
     gotColor = buttColor;//手上的球變成底部球的顏色
-    ballY = butt;//讓動畫開始跑
+    ballAnimY = butt;//讓動畫開始跑
 
     for (int j = deadlinePos-1; j >= 0; j--) {//把吸掉的球清空
       if (grid[posX][j] == gotColor) {//計算顏色相同的球數
@@ -297,21 +297,21 @@ class Player {
   }
 
   void ballRun() {  //丟球拿球動畫(放在draw裡面)
-    if (ballDown && ballY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
-      ballY++;
-      if (gotColor == 1) image(imgRedBall, posX*RECT_SIZE, ballY*RECT_SIZE);
-      else if (gotColor == 2) image(imgYellowBall, posX*RECT_SIZE, ballY*RECT_SIZE);
-      else if (gotColor == 3) image(imgGreenBall, posX*RECT_SIZE, ballY*RECT_SIZE);
-      else if (gotColor == 4) image(imgBlueBall, posX*RECT_SIZE, ballY*RECT_SIZE);
+    if (ballDown && ballAnimY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
+      ballAnimY++;
+      if (gotColor == 1) image(imgRedBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
+      else if (gotColor == 2) image(imgYellowBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
+      else if (gotColor == 3) image(imgGreenBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
+      else if (gotColor == 4) image(imgBlueBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
     } else {
-      int ballTargetY = getButt(ballX); //丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
-      if (ballUp && ballY >= ballTargetY) {
-        if (ballY > ballTargetY) {
-          ballY--;      
-          if (gotColor == 1) image(imgRedBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
-          else if (gotColor == 2) image(imgYellowBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
-          else if (gotColor == 3) image(imgGreenBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
-          else if (gotColor == 4) image(imgBlueBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+      int ballTargetY = getButt(ballAnimX); //丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
+      if (ballUp && ballAnimY >= ballTargetY) {
+        if (ballAnimY > ballTargetY) {
+          ballAnimY--;      
+          if (gotColor == 1) image(imgRedBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
+          else if (gotColor == 2) image(imgYellowBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
+          else if (gotColor == 3) image(imgGreenBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
+          else if (gotColor == 4) image(imgBlueBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
         } else gotColor=0;//動畫跑完下面的球才歸零(先歸零或用starty動畫都會消失)(使用starty因為不會略過5所以消除時不會有動畫)
       }
     }
