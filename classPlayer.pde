@@ -231,7 +231,6 @@ class Player {
       {
         colorReadyBomb(posX, startY+this.nBalls-1);
       }
-      findSix();
     } else //沒有觸發消除時會斷combo
     {
       if (combo > 0) stopCombo();
@@ -246,26 +245,24 @@ class Player {
     this.nBalls = 0;//丟完之後手上拿的球歸零
   }
   void bombAndFly() {
-
+    findTriggerBalls();
     bombBall();
     detectHole();//球往上飄
     boolean comboPlus = false; //有爆破引發的子爆破
     for (int i = 0; i < ROW_NUM; i++) {
       for (int j = 0; j < deadlinePos; j++) {//偵測往上飄的所有球
         if (state[i][j]==6) {
-          if (checkBomb(i, j)) {//偵測是否三個相連(是否觸發消除)
+          if (checkTriggerBomb(i, j)) {//偵測是否三個相連(是否觸發消除)
             colorReadyBomb(i, j);
             comboPlus=true;
           }
+          state[i][j] = 0;
         }
       }
     }
 
     if (comboPlus) {//有待爆球的情況
       startBomb();
-      findSix();
-    } else {
-      clearSix();
     }
   }
   //-----------------BallControls------------
@@ -297,7 +294,6 @@ class Player {
     ballDown = true;
     ballUp = false;
 
-    if (state[posX][butt-1]==6)state[posX][butt-1]=0;//拿還沒往上飄的球時把state歸零            
     gotColor = buttColor;//手上的球變成底部球的顏色
     ballY = startY;//讓動畫開始跑
 
@@ -394,30 +390,19 @@ class Player {
   }
 
 
-  boolean checkBomb(int x, int y) {//偵測往上飄的球是否的觸發引爆
-    if (grid[x][y]!=0) {
-      if (y-1>=0) {
-        if (grid[x][y-1]==grid[x][y]) {
-          if (y-2>=0) {
-            if (grid[x][y-2]==grid[x][y]) {
-              return true;
-            }
+  boolean checkTriggerBomb(int x, int y) {//偵測往上飄的球是否的觸發引爆
+    if (grid[x][y] == 0 || grid[x][y] == 5)
+      return false;
+
+    //triggerBall必須與下方的球相同顏色才能觸發引爆
+    if (y+1<deadlinePos) {
+      if (grid[x][y+1]==grid[x][y]) {
+        if (y+2<deadlinePos) {
+          if (grid[x][y+2]==grid[x][y]) {
+            return true;
           }
-        }
-      }
-      if (y-1>=0) {
-        if (grid[x][y-1]==grid[x][y]) {
-          if (y+1<deadlinePos) {
-            if (grid[x][y+1]==grid[x][y]) {
-              return true;
-            }
-          }
-        }
-      }
-      if (y+1<deadlinePos) {
-        if (grid[x][y+1]==grid[x][y]) {
-          if (y+2<deadlinePos) {
-            if (grid[x][y+2]==grid[x][y]) {
+          if (y-1>=0) {
+            if (grid[x][y-1]==grid[x][y]) {
               return true;
             }
           }
@@ -448,12 +433,13 @@ class Player {
       if (grid[x][y+1]==ballColor)subBomb(ballColor, x, y+1);
     }
   }
-  void findSix() { //將正在爆破的球下方的球設為6=>等待往上飄的球
+  void findTriggerBalls() { //將正在爆破的球上方的球設為6=>可以觸發子爆炸的球
     for (int i=0; i<ROW_NUM; i++) {
-      for (int j=0; j<deadlinePos; j++) {
-        if (state[i][j] == 5) {
-          if (j+1<deadlinePos) {
-            if (state[i][j+1] != 5 && grid[i][j+1] != 0) state[i][j+1] = 6;
+      for (int j=deadlinePos; j>=1; j--) {
+        if (grid[i][j] == 5) {
+          if (grid[i][j-1] != 5 && grid[i][j-1] != 0) {
+            state[i][j-1] = 6;
+            j-=1; //下一次檢查跳過設為6的球
           }
         }
       }
@@ -462,7 +448,7 @@ class Player {
   void bombBall() {
     for (int i=0; i<ROW_NUM; i++) {
       for (int j=0; j<COL_NUM; j++) {
-        if (state[i][j]==5) {
+        if (grid[i][j]==5) {
           grid[i][j]=0;
           state[i][j]=0;
         }
@@ -470,15 +456,6 @@ class Player {
     }
     bombTargetNum-=bombingNum;
     bombingNum=0;
-  }
-  void clearSix() {
-    for (int i=0; i<ROW_NUM; i++) {
-      for (int j=0; j<deadlinePos; j++) {
-        if (state[i][j] == 6) {
-          state[i][j] =0;
-        }
-      }
-    }
   }
 
   //-----------------------增加球-------------------------  
@@ -493,7 +470,7 @@ class Player {
         }
       }
       if (ballNum + nBalls < (ROW_NUM * BALL_COL_NUM_INIT)) {      
-        rowsWaitingToAdd++; //<>//
+        rowsWaitingToAdd++;
       }
     }
 
