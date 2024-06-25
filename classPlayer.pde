@@ -14,6 +14,12 @@ enum GameResult {
     LOSE //敗者
 }
 
+enum BallAnimStatus {
+  NONE, 
+    UP, 
+    DOWN
+}
+
 class Player {
 
   int [][] grid; //儲存球的類型資訊 0:空格, 1:紅, 2:黃, 3:綠, 4:藍, 5:爆破中
@@ -33,7 +39,7 @@ class Player {
   int lastAddBallTime;
   int rowsWaitingToAdd; //等待加的行數
 
-  boolean ballDown, ballUp; //丟球拿球動畫的判斷
+  BallAnimStatus ballAnimStatus; //丟球拿球動畫的狀態
   int ballAnimX, ballAnimY; //丟球拿球動畫的位置
   int ballAnimColor; //丟球拿球動畫的顏色
 
@@ -64,8 +70,7 @@ class Player {
 
     isBombing = false;
     combo = 0;
-    ballDown = false;
-    ballUp = false;
+    ballAnimStatus = BallAnimStatus.NONE;
     lastAddBallTime = 0;
     rowsWaitingToAdd = 0;
 
@@ -201,8 +206,8 @@ class Player {
     soundBallUp.play();
 
     //更新動畫
-    ballUp = true;
-    ballDown = false;
+    ballAnimStatus = BallAnimStatus.UP;
+    ballAnimY = posY;
     ballAnimColor = gotColor;
     ballAnimX = posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
 
@@ -283,10 +288,10 @@ class Player {
     soundBallDown.play();
 
     //更新動畫
-    ballDown = true;
-    ballUp = false;
+    ballAnimStatus = BallAnimStatus.DOWN;
     ballAnimY = butt;
     ballAnimColor = buttColor;
+    ballAnimX = posX;
 
     gotColor = buttColor;//手上的球變成底部球的顏色
 
@@ -300,22 +305,36 @@ class Player {
   }
 
   void ballRun() {  //丟球拿球動畫(放在draw裡面)
-    if (ballDown && ballAnimY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
-      ballAnimY++;
-      PImage ballImg = getBallImage(ballAnimColor);
-      if (ballImg != null) image(ballImg, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
-    } else {
-      int ballTargetY = getButt(ballAnimX); //丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
-      if (ballUp && ballAnimY >= ballTargetY) {
+    switch(ballAnimStatus) {
+    case UP:
+      {
+        int ballTargetY = getButt(ballAnimX); //丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
         if (ballAnimY > ballTargetY) {
-          ballAnimY--;      
-          PImage ballImg = getBallImage(ballAnimColor);
-          if (ballImg != null) image(ballImg, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
+          ballAnimY--;
+        } else {
+          ballAnimStatus = BallAnimStatus.NONE;
+          return;
         }
       }
+      break;
+    case DOWN:
+      {
+        if (ballAnimY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
+          ballAnimY++;
+          ballAnimX = posX;
+        } else {
+          ballAnimStatus = BallAnimStatus.NONE;
+          return;
+        }
+      }
+      break;
+    default:
+      return;
     }
-  }
 
+    PImage ballImg = getBallImage(ballAnimColor);
+    if (ballImg != null) image(ballImg, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
+  }
 
   void detectHole() {//球上有空格就往上飄
     boolean hole=false;
