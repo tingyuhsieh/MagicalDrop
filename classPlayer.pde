@@ -151,22 +151,12 @@ class Player {
         }
       }
       //--------------------------------玩家球的顏色------------------------
-      if (gotColor == 0) {
-        refLineColor = color(255, 255, 255);
-        image(imgEmpty, posX*RECT_SIZE, posY*RECT_SIZE);
-      } else if (gotColor == 1) {
-        refLineColor = color(255, 0, 0);
-        image(imgRedBall, posX*RECT_SIZE, posY*RECT_SIZE);
-      } else if (gotColor == 2) {
-        refLineColor = color(255, 255, 0);
-        image(imgYellowBall, posX*RECT_SIZE, posY*RECT_SIZE);
-      } else if (gotColor == 3) {
-        refLineColor = color(0, 255, 0);
-        image(imgGreenBall, posX*RECT_SIZE, posY*RECT_SIZE);
-      } else if (gotColor == 4) {
-        refLineColor = color(0, 0, 255);
-        image(imgBlueBall, posX*RECT_SIZE, posY*RECT_SIZE);
-      }
+      refLineColor = getBallHexColor(gotColor);
+      PImage gotBallImg = getBallImage(gotColor);
+      if (gotBallImg == null) {
+        gotBallImg = imgEmpty; //slot
+      } 
+      image(gotBallImg, posX*RECT_SIZE, posY*RECT_SIZE);
       //----------------------------死線--------------------------------
       drawDeadLine();
     } else if (gameState == GameState.GAME_OVER) {
@@ -312,19 +302,15 @@ class Player {
   void ballRun() {  //丟球拿球動畫(放在draw裡面)
     if (ballDown && ballAnimY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
       ballAnimY++;
-      if (ballAnimColor == 1) image(imgRedBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
-      else if (ballAnimColor == 2) image(imgYellowBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
-      else if (ballAnimColor == 3) image(imgGreenBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
-      else if (ballAnimColor == 4) image(imgBlueBall, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
+      PImage ballImg = getBallImage(ballAnimColor);
+      if (ballImg != null) image(ballImg, posX*RECT_SIZE, ballAnimY*RECT_SIZE);
     } else {
       int ballTargetY = getButt(ballAnimX); //丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
       if (ballUp && ballAnimY >= ballTargetY) {
         if (ballAnimY > ballTargetY) {
           ballAnimY--;      
-          if (ballAnimColor == 1) image(imgRedBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
-          else if (ballAnimColor == 2) image(imgYellowBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
-          else if (ballAnimColor == 3) image(imgGreenBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
-          else if (ballAnimColor == 4) image(imgBlueBall, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
+          PImage ballImg = getBallImage(ballAnimColor);
+          if (ballImg != null) image(ballImg, ballAnimX*RECT_SIZE, ballAnimY*RECT_SIZE);
         }
       }
     }

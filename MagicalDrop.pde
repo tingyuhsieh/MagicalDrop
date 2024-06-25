@@ -99,6 +99,36 @@ void keyPressed() {
   }
 }
 
+PImage getBallImage(int ballColor) {
+  switch (ballColor) {
+  case 1:
+    return imgRedBall;
+  case 2:
+    return imgYellowBall;
+  case 3:
+    return imgGreenBall;
+  case 4:
+    return imgBlueBall;
+  default:
+    return null;
+  }
+}
+
+color getBallHexColor(int ballColor) {
+  switch (ballColor) {
+  case 1:
+    return color(255, 0, 0);
+  case 2:
+    return color(255, 255, 0);
+  case 3:
+    return color(0, 255, 0);
+  case 4:
+    return color(0, 0, 255);
+  default:
+    return color(255, 255, 255);
+  }
+}
+
 void drawCombo(int combo, float posX, float posY) {
   if (combo>0)drawNum(combo, 2, posX, posY);
 }
