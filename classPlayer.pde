@@ -296,11 +296,13 @@ class Player {
     gotColor = buttColor;//手上的球變成底部球的顏色
 
 
-    for (int j = deadlinePos-1; j >= 0; j--) {//把吸掉的球清空
+    for (int j = deadlinePos-1; j >= 0; j--) {
       if (grid[posX][j] == gotColor) {//計算顏色相同的球數
         nBalls++;       
-        grid[posX][j] = 0;
-      } else if (grid[posX][j]!=0&&grid[posX][j]!=5)break;//由下往上偵測顏色不與玩家相同就跳出迴圈
+        grid[posX][j] = 0; //把吸掉的球清空
+      } else if (grid[posX][j] != 0) {
+        break;//由下往上偵測顏色不與玩家相同就跳出迴圈
+      }
     }
   }
 
