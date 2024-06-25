@@ -34,7 +34,6 @@ class Player {
   int rowsWaitingToAdd; //等待加的行數
 
   boolean ballDown, ballUp; //丟球拿球動畫的判斷
-  int startY; //底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
   int ballX, ballY; //丟球拿球動畫的位置
 
   String playerName;
@@ -57,7 +56,7 @@ class Player {
 
     posX = COL_NUM/2;
     posY = ROW_NUM-1;
-    startY=0;
+    butt=0;
     nBalls = 0;
     ballY = 0;
     bombStartTime = 0;
@@ -92,22 +91,37 @@ class Player {
   }
 
   void drawPlayer(PImage imgPlayer) {
-    image(imgPlayer, 0, 0);
     if (gameState == GameState.GAMING) {
-      getButt();
+      update();
+    }
+
+    display(imgPlayer);
+  }
+
+  void update() { 
+    //--------------------------bomb結束判定---------------------------
+    if (isBombing) {
+      if (millis() - bombStartTime > BOMBING_DURATION) { //bomb結束
+        isBombing = false;
+        if (bombingNum >= 3)bombAndFly(); //有待爆球時將球消除並向上填補空位
+      }
+    }
+    //---------------檢查combo計算的有效時間,超過時結束combo------------------
+    if (combo > 0 && millis() - bombStartTime > COMBO_VAILD_DURATION) {
+      stopCombo();
+    }
+    //-------------檢查是否需加球------------------
+    checkAddBalls();
+    //--------------update butt------------------
+    butt = getButt(posX);
+  }
+
+  void display(PImage imgPlayer) {
+    image(imgPlayer, 0, 0);
+
+    if (gameState == GameState.GAMING) {
       drawRefLine();
       ballRun();
-      //--------------------------bomb結束判定---------------------------
-      if (isBombing) {
-        if (millis() - bombStartTime > BOMBING_DURATION) { //bomb結束
-          isBombing = false;
-          if (bombingNum >= 3)bombAndFly(); //有待爆球時將球消除並向上填補空位
-        }
-      }
-      //---------------檢查combo計算的有效時間,超過時結束combo------------------
-      if (combo > 0 && millis() - bombStartTime > COMBO_VAILD_DURATION) {
-        stopCombo();
-      }
       //------------------------畫出上面的球---------------
       for (int i = 0; i < COL_NUM; i++) {
         for (int j = 0; j < ROW_NUM; j++) {
@@ -135,8 +149,6 @@ class Player {
           //}
         }
       }
-      //-------------檢查是否需加球------------------
-      checkAddBalls();
       //--------------------------------玩家球的顏色------------------------
       if (gotColor == 0) {
         refLineColor = color(255, 255, 255);
@@ -174,27 +186,27 @@ class Player {
     //-----------------------左右移動------------------------
     if (keyCode == leftKeyCode && posX > 0) {
       posX--;
+      butt = getButt(posX);
     } else if (keyCode == rightKeyCode && posX < COL_NUM-1) {
       posX++;
+      butt = getButt(posX);
     } 
     //---------------------上下拿球丟球---------------------
     else if (keyCode == upKeyCode) { 
       soundBallDown.stop();
 
       if (nBalls > 0) {//如果手上有球就丟
-        findStartY();
         throwAndWait(nBalls);
-        findStartY();//更新starty讓動畫正確
         ballX=posX;//丟球動畫的x會停留在丟球瞬間(不會跟著玩家移動)
       }
     } else if (keyCode == downKeyCode) {
       soundBallUp.stop();
-      findStartY();
-
       if (butt-1>=0) { //檢查底部的球是不是可以拿的球
         int buttColor = grid[posX][butt-1];
-        if (gotColor ==0 || gotColor==buttColor) { //是可以拿的球才判斷是不是可以拿的顏色
-          takeBalls(buttColor);
+        if (buttColor != 5) {
+          if (gotColor == 0 || gotColor==buttColor) { //是可以拿的球才判斷是不是可以拿的顏色
+            takeBalls(buttColor);
+          }
         }
       }
     }
@@ -208,7 +220,7 @@ class Player {
     ballDown = false;
 
 
-    for (int i=startY; i<startY+nBalls&&i<ROW_NUM; i++) {
+    for (int i=butt; i<butt+nBalls&&i<ROW_NUM; i++) {
       grid[posX][i]=gotColor;
     } 
 
@@ -216,13 +228,13 @@ class Player {
     {
       startBomb();
 
-      if (startY+this.nBalls-1>ROW_NUM-1)
+      if (butt+this.nBalls-1>ROW_NUM-1)
       {
-        bombingNum+=startY+this.nBalls-1-(ROW_NUM-1);
+        bombingNum+=butt+this.nBalls-1-(ROW_NUM-1);
         colorReadyBomb(posX, ROW_NUM-1);
       } else 
       {
-        colorReadyBomb(posX, startY+this.nBalls-1);
+        colorReadyBomb(posX, butt+this.nBalls-1);
       }
     } else //沒有觸發消除時會斷combo
     {
@@ -259,15 +271,13 @@ class Player {
     }
   }
   //-----------------BallControls------------
-  void getButt() {//不斷更新底部空格(不包含5)的位置(使用於line以及拿球)
+  int getButt(int col) { //取得底部空格的位置
     for (int j = ROW_NUM-2; j >= 0; j--) {
-      if (grid[posX][j] != 0&&grid[posX][j] != 5) {
-        butt = j+1;
-        break;
-      } else {
-        butt =0;
+      if (grid[col][j] != 0) {
+        return j+1;
       }
     }
+    return 0;
   }
   void takeBalls(int buttColor) {
     soundBallDown.stop();
@@ -276,7 +286,7 @@ class Player {
     ballUp = false;
 
     gotColor = buttColor;//手上的球變成底部球的顏色
-    ballY = startY;//讓動畫開始跑
+    ballY = butt;//讓動畫開始跑
 
     for (int j = deadlinePos-1; j >= 0; j--) {//把吸掉的球清空
       if (grid[posX][j] == gotColor) {//計算顏色相同的球數
@@ -287,21 +297,23 @@ class Player {
   }
 
   void ballRun() {  //丟球拿球動畫(放在draw裡面)
-
     if (ballDown && ballY < posY) {//吸球時x看玩家的位置(動畫會跟玩家移動)
       ballY++;
       if (gotColor == 1) image(imgRedBall, posX*RECT_SIZE, ballY*RECT_SIZE);
       else if (gotColor == 2) image(imgYellowBall, posX*RECT_SIZE, ballY*RECT_SIZE);
       else if (gotColor == 3) image(imgGreenBall, posX*RECT_SIZE, ballY*RECT_SIZE);
       else if (gotColor == 4) image(imgBlueBall, posX*RECT_SIZE, ballY*RECT_SIZE);
-    } else if (ballUp && ballY >= startY) {//丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
-      if (ballY > startY) {
-        ballY--;      
-        if (gotColor == 1) image(imgRedBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
-        else if (gotColor == 2) image(imgYellowBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
-        else if (gotColor == 3) image(imgGreenBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
-        else if (gotColor == 4) image(imgBlueBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
-      } else gotColor=0;//動畫跑完下面的球才歸零(先歸零或用starty動畫都會消失)(使用starty因為不會略過5所以消除時不會有動畫)
+    } else {
+      int ballTargetY = getButt(ballX); //丟球時x停留在丟球當下的位置(動畫不會跟玩家移動)
+      if (ballUp && ballY >= ballTargetY) {
+        if (ballY > ballTargetY) {
+          ballY--;      
+          if (gotColor == 1) image(imgRedBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+          else if (gotColor == 2) image(imgYellowBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+          else if (gotColor == 3) image(imgGreenBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+          else if (gotColor == 4) image(imgBlueBall, ballX*RECT_SIZE, ballY*RECT_SIZE);
+        } else gotColor=0;//動畫跑完下面的球才歸零(先歸零或用starty動畫都會消失)(使用starty因為不會略過5所以消除時不會有動畫)
+      }
     }
   }
 
@@ -334,18 +346,6 @@ class Player {
     }
   }
 
-  void findStartY() {//找底部空格的y(丟球拿球時觸發)(就算左右移動也不會改變)
-
-    for (int j = ROW_NUM-2; j >= 0; j--) {
-      if (grid[posX][j] != 0) {
-        startY = j+1;
-        break;
-      } else {
-        startY =0;
-      }
-    }
-  }
-
   boolean checkBomb() {//偵測往上丟的球是否觸發引爆
 
     if (nBalls>=3) {
@@ -353,15 +353,15 @@ class Player {
     } 
 
     if (nBalls==2) {
-      if (startY>0) {
-        if (grid[posX][startY-1]==grid[posX][startY]) {
+      if (butt>0) {
+        if (grid[posX][butt-1]==grid[posX][butt]) {
           return true;
         }
       }
     } 
 
-    if (startY-1>0) {
-      if (grid[posX][startY-2]==grid[posX][startY-1]&&grid[posX][startY-1]==grid[posX][startY]) {
+    if (butt-1>0) {
+      if (grid[posX][butt-2]==grid[posX][butt-1]&&grid[posX][butt-1]==grid[posX][butt]) {
         return true;
       }
     }
