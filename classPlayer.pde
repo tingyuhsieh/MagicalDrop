@@ -194,26 +194,19 @@ class Player {
     } 
     //---------------------上下拿球丟球---------------------
     else if (keyCode == upKeyCode) { 
-      soundBallDown.stop();
-
-      if (nBalls > 0) {//如果手上有球就丟
-        throwAndWait(nBalls);
-      }
+      throwBalls(nBalls);
     } else if (keyCode == downKeyCode) {
-      soundBallUp.stop();
-      if (butt-1>=0) { //檢查底部的球是不是可以拿的球
-        int buttColor = grid[posX][butt-1];
-        if (buttColor != 5) {
-          if (gotColor == 0 || gotColor==buttColor) { //是可以拿的球才判斷是不是可以拿的顏色
-            takeBalls(buttColor);
-          }
-        }
-      }
+      takeBalls();
     }
   }
 
   //--------------------balldelay---------------
-  void throwAndWait(int nBalls) {
+  void throwBalls(int nBalls) {
+    soundBallDown.stop();
+
+    if (nBalls == 0)
+      return;
+
     soundBallUp.stop();
     soundBallUp.play();
 
@@ -283,7 +276,19 @@ class Player {
     }
     return 0;
   }
-  void takeBalls(int buttColor) {
+  void takeBalls() {
+    soundBallUp.stop();
+
+    if (butt-1 < 0)//檢查底部的球是不是可以拿的球
+      return;
+
+    int buttColor = grid[posX][butt-1];
+    if (buttColor == 5) 
+      return;
+
+    if (gotColor != 0 && gotColor!=buttColor)//是可以拿的球才檢查是不是可以拿的顏色
+      return;
+
     soundBallDown.stop();
     soundBallDown.play();
 
