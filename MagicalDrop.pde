@@ -1,3 +1,4 @@
+import java.util.*;
 import processing.sound.*;
 SoundFile soundAddBalls, soundBallDown, soundBallUp, soundBgm;
 
@@ -80,8 +81,8 @@ void draw() {
 
   if (gameState == GameState.GAMING) {
     // drawCombo
-    drawCombo(player1.combo, -240, 580);
-    drawCombo(player2.combo, 310, 580);
+    drawCombo(player1.ballController.combo, -240, 580);
+    drawCombo(player2.ballController.combo, 310, 580);
 
     if (checkGameOver())
       gameState = GameState.GAME_OVER;
@@ -99,30 +100,30 @@ void keyPressed() {
   }
 }
 
-PImage getBallImage(int ballColor) {
+PImage getBallImage(BallColor ballColor) {
   switch (ballColor) {
-  case 1:
+  case RED:
     return imgRedBall;
-  case 2:
+  case YELLOW:
     return imgYellowBall;
-  case 3:
+  case GREEN:
     return imgGreenBall;
-  case 4:
+  case BLUE:
     return imgBlueBall;
   default:
     return null;
   }
 }
 
-color getBallHexColor(int ballColor) {
+color getBallHexColor(BallColor ballColor) {
   switch (ballColor) {
-  case 1:
+  case RED:
     return color(255, 0, 0);
-  case 2:
+  case YELLOW:
     return color(255, 255, 0);
-  case 3:
+  case GREEN:
     return color(0, 255, 0);
-  case 4:
+  case BLUE:
     return color(0, 0, 255);
   default:
     return color(255, 255, 255);
@@ -174,7 +175,7 @@ boolean checkGameOver() {
     return true;
   }
 
-  // Check if either player achieved the goal
+  // Check if either player achieved the goal //<>//
   if (player1.checkGoal() || player2.checkGoal())
   {
     if (player1.checkGoal() && player2.checkGoal())
@@ -194,18 +195,18 @@ boolean checkGameOver() {
   }
 
   return false;
-} //<>//
+}
 
-void setDeuceResult() {
+private void setDeuceResult() {
   player1.gameResult = player2.gameResult = GameResult.DEUCE;
 }
 
-void setWinLoseResult(Player winner, Player loser) {
+private void setWinLoseResult(Player winner, Player loser) {
   winner.gameResult = GameResult.WIN;
   loser.gameResult = GameResult.LOSE;
 }
 
-void printPlayerLoseDetail(Player player) {
+private void printPlayerLoseDetail(Player player) {
   switch(player.status)
   {
   case DEAD_BY_MISPLAY:
