@@ -162,7 +162,7 @@ class BallController {
 
     boolean startBomb = false;
     for (Point p : triggers) {
-      Set<Point> toBomb = checkTriggerBomb(p.col, p.row); //<>//
+      Set<Point> toBomb = checkTriggerBomb(p.col, p.row);
       if (toBomb != null && toBomb.size() > 0) {
         markAllBombing(toBomb);
         startBomb = true;
@@ -290,6 +290,7 @@ class BallController {
 
     if (takeBallNum == 0) return false;
 
+    // update player ballData
     ballData.ballColor = targetColor;
     ballData.ballNum += takeBallNum;
 
@@ -310,11 +311,8 @@ class BallController {
     Point trigger = new Point(col, getRowNum(col));
     balls[col].addAll(new ArrayList<Ball>(Collections.nCopies(ballData.ballNum, new Ball(ballData.ballColor))));
 
-    ballData.ballColor = BallColor.NONE;
-    ballData.ballNum = 0;
-
     //check bomb
-    Set<Point> toBomb = checkBomb(trigger.col, trigger.row);
+    Set<Point> toBomb = checkBomb(trigger.col, trigger.row, ballData);
     if (toBomb != null && toBomb.size() > 0) {
       markAllBombing(toBomb);
       onStartBomb();
@@ -327,28 +325,27 @@ class BallController {
       }
     }
 
+    // update player ballData
+    ballData.ballColor = BallColor.NONE;
+    ballData.ballNum = 0;
+
     return true;
   }
 
   //-----------------------引爆偵測------------------------
-  private Set<Point> checkBomb(int col, int row) {//偵測玩家丟的球是否觸發引爆
-    ArrayList<Ball> column = balls[col];
-    Ball triggerBall = column.get(row);
-    BallColor triggerColor = triggerBall.ballColor;
+  private Set<Point> checkBomb(int col, int startRow, PlayerBallData ballData) {//偵測玩家丟的球是否觸發引爆
 
-    if (triggerBall.isBombing())
+    if (ballData == null || ballData.ballNum == 0 || ballData.ballColor == BallColor.NONE)
       return null;
+
+    ArrayList<Ball> column = balls[col];
+    BallColor triggerColor = ballData.ballColor;
 
     Set<Point> toBomb = new HashSet<Point>(); // 使用 Set 來存儲需要標記的球的位置
 
     // 檢查垂直方向
-    int start = row;
-    int end = row;
-
-    // 向下檢查
-    while (end < column.size() - 1 && column.get(end + 1).ballColor == triggerColor && !column.get(end + 1).isBombing()) {
-      end++;
-    }
+    int start = startRow;
+    int end = startRow + ballData.ballNum - 1;
 
     // 向上檢查
     while (start > 0 && column.get(start - 1).ballColor == triggerColor && !column.get(start - 1).isBombing()) {
